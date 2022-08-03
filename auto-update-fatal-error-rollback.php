@@ -20,7 +20,7 @@ namespace Fragen;
 
 add_filter(
 	'upgrader_install_package_result',
-	[ new Auto_Update_Failure_Rollback(), 'failure_check' ],
+	[ new Auto_Update_Failure_Rollback(), 'auto_update_failure_check' ],
 	10,
 	2
 );
@@ -38,9 +38,9 @@ class Auto_Update_Failure_Rollback {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function failure_check( $result, $hook_extra ) {
+	public function auto_update_failure_check( $result, $hook_extra ) {
 		register_shutdown_function(
-			[ $this, 'fatal_handler' ],
+			[ $this, 'shutdown_handler' ],
 			[
 				'result'     => $result,
 				'hook_extra' => $hook_extra,
@@ -134,7 +134,7 @@ class Auto_Update_Failure_Rollback {
 	 *
 	 * @return void
 	 */
-	public function fatal_handler( $args ) {
+	public function shutdown_handler( $args ) {
 		$hook_extra = $args['hook_extra'];
 		$result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$this->cron_rollback( $result, $hook_extra );
