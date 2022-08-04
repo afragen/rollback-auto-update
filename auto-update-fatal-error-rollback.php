@@ -6,7 +6,7 @@
  *
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
- * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
+ * Description:       Rollback an auto-update containing an activation error.
  * Version:           0.5.5
  * Author:            WP Core Contributors
  * License:           MIT
