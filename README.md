@@ -24,6 +24,6 @@ The simplest way to test is to download, install, and activate [Git Updater](htt
 
 If you wish to download the zip directly, you will need to unzip, rename the containing folder to remove the `-main`, re-zip, and then install via the Upload Plugin screen.
 
-Once installed you will need to change the version number to `0` and comment out the code. After doing this you can activate the plugin. Set it to _Enable auto-updates_ in the Plugins page.
+Once installed you will need to change the version number to `0` and comment out the code. After doing this you can activate the plugin, but you can leave it disabled. Set it to _Enable auto-updates_ in the Plugins page.
 
 If the Rollback works, your site will not show a WSOD after the auto-update as the previous, commented plugin will still be the active plugin. You will still show a plugin update.
