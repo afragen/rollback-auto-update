@@ -7,7 +7,7 @@
  * Plugin Name:       Auto-update Fatal Error Rollback
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
  * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
- * Version:           0.5.2
+ * Version:           0.5.3
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -42,17 +42,22 @@ class Auto_Update_Failure_Rollback {
 		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
 
 			// Register exception and shutdown handlers.
-			$lambda = function( $exception ) use ( $hook_extra ) {
-				$this->exception_handler( $hook_extra );
+			$handler_args = [
+				'result'     => $result,
+				'hook_extra' => $hook_extra,
+			];
+			$lambda       = function( $exception ) use ( $handler_args ) {
+				$this->exception_handler( $handler_args );
 			};
 			set_exception_handler( $lambda );
-			register_shutdown_function(
-				[ $this, 'shutdown_handler' ],
-				[
-					'result'     => $result,
-					'hook_extra' => $hook_extra,
-				]
-			);
+
+			$lambda2 = function( $error ) use ( $handler_args ) {
+				$this->error_handler( $handler_args );
+			};
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+			set_error_handler( $lambda2 );
+
+			register_shutdown_function( [ $this, 'shutdown_handler' ], $handler_args );
 
 			$plugin = $hook_extra['plugin'];
 			ob_start();
@@ -154,6 +159,21 @@ class Auto_Update_Failure_Rollback {
 	public function exception_handler( $args ) {
 		\error_log( 'Exception caught' );
 		restore_exception_handler();
+		$hook_extra = $args['hook_extra'];
+		$result     = $args['result'];
+		$this->cron_rollback( $result, $hook_extra );
+	}
+
+	/**
+	 * Run the Rollback code on PHP fatal.
+	 *
+	 * @param array $args Array of args.
+	 *
+	 * @return void
+	 */
+	public function error_handler( $args ) {
+		\error_log( 'Error caught' );
+		restore_error_handler();
 		$hook_extra = $args['hook_extra'];
 		$result     = $args['result'];
 		$this->cron_rollback( $result, $hook_extra );
