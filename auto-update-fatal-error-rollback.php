@@ -41,6 +41,7 @@ class Auto_Update_Failure_Rollback {
 	public function auto_update_failure_check( $result, $hook_extra ) {
 		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
 
+			// Register exception and shutdown handlers.
 			$lambda = function( $exception ) use ( $hook_extra ) {
 				$this->exception_handler( $hook_extra );
 			};
@@ -53,7 +54,6 @@ class Auto_Update_Failure_Rollback {
 				]
 			);
 
-		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
 			$plugin = $hook_extra['plugin'];
 			ob_start();
 
@@ -149,13 +149,13 @@ class Auto_Update_Failure_Rollback {
 		$this->cron_rollback( $result, $hook_extra );
 	}
 
-		/**
-		 * Run the Rollback code on PHP fatal.
-		 *
-		 * @param array $args Array of args.
-		 *
-		 * @return void
-		 */
+	/**
+	 * Run the Rollback code on PHP fatal.
+	 *
+	 * @param array $args Array of args.
+	 *
+	 * @return void
+	 */
 	public function exception_handler( $args ) {
 		\error_log( 'Exception caught' );
 		restore_exception_handler();
