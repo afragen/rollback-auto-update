@@ -139,7 +139,13 @@ class Auto_Update_Failure_Rollback {
 	 * @return void
 	 */
 	public function shutdown_handler( $args ) {
+		\error_log( 'Shutdown caught' );
 		$hook_extra = $args['hook_extra'];
+		$result     = $args['result'];
+		// $result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
+		$this->cron_rollback( $result, $hook_extra );
+	}
+
 		/**
 		 * Run the Rollback code on PHP fatal.
 		 *
