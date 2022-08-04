@@ -1,13 +1,13 @@
 <?php
 /**
- * Auto-update fatal error Rollback.
+ * Rollback an auto-update containing an activation error.
  *
- * @package AutoUpdateFatalErrorRollback
+ * @package Rollback_Auto_Update
  *
- * Plugin Name:       Auto-update Fatal Error Rollback
+ * Plugin Name:       Rollback_Auto_Update
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
  * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
- * Version:           0.5.4
+ * Version:           0.5.5
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -20,7 +20,7 @@ namespace Fragen;
 
 add_filter(
 	'upgrader_install_package_result',
-	[ new Auto_Update_Failure_Rollback(), 'auto_update_failure_check' ],
+	[ new Rollback_Auto_Update(), 'auto_update_check' ],
 	10,
 	2
 );
@@ -28,7 +28,7 @@ add_filter(
 /**
  * Class Auto_Update_Failure_Check
  */
-class Auto_Update_Failure_Rollback {
+class Rollback_Auto_Update {
 
 	/**
 	 * Check validity of updated plugin.
@@ -38,8 +38,9 @@ class Auto_Update_Failure_Rollback {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function auto_update_failure_check( $result, $hook_extra ) {
+	public function auto_update_check( $result, $hook_extra ) {
 		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
+			$plugin = $hook_extra['plugin'];
 
 			// Register exception and shutdown handlers.
 			$handler_args = [
@@ -47,34 +48,22 @@ class Auto_Update_Failure_Rollback {
 				'result'     => $result,
 				'hook_extra' => $hook_extra,
 			];
-			register_shutdown_function( [ $this, 'handler' ], $handler_args );
-			$lambda = function( $error ) use ( $handler_args ) {
+			$lambda_error = function( $error ) use ( $handler_args ) {
 				$handler_args['error'] = 'Error Caught';
 				$this->handler( $handler_args );
 			};
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-			set_error_handler( $lambda );
-			$lambda2 = function( $exception ) use ( $handler_args ) {
+			set_error_handler( $lambda_error );
+			$lambda_exception = function( $exception ) use ( $handler_args ) {
 				$handler_args['error'] = 'Exception Caught';
 				$this->handler( $handler_args );
 			};
-			set_exception_handler( $lambda2 );
-
-			$plugin = $hook_extra['plugin'];
-			ob_start();
+			set_exception_handler( $lambda_exception );
+			register_shutdown_function( [ $this, 'handler' ], $handler_args );
 
 			// working parts of `plugin_sandbox_scrape()`.
 			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-			try {
-				include WP_PLUGIN_DIR . '/' . $plugin;
-			} catch ( \Exception $e ) {
-				echo esc_attr( $e->getMessage() );
-			}
-
-			if ( ob_get_length() > 0 ) {
-				ob_end_clean();
-				$this->cron_rollback( $result, $hook_extra );
-			}
+			include WP_PLUGIN_DIR . '/' . $plugin;
 		}
 
 		return $result;
@@ -106,14 +95,8 @@ class Auto_Update_Failure_Rollback {
 			],
 		];
 		$hook_extra  = array_merge( $hook_extra, $temp_backup );
-		$options     = [ 'hook_extra' => $hook_extra ];
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
-
-		// Set private $options variable.
-		$ref_options = new \ReflectionProperty( $rollback_updater, 'options' );
-		$ref_options->setAccessible( true );
-		$ref_options->setValue( $rollback_updater, $options );
 
 		// Set private $temp_restores variable.
 		$ref_temp_restores = new \ReflectionProperty( $rollback_updater, 'temp_restores' );
