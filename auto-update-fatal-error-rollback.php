@@ -92,6 +92,7 @@ class Auto_Update_Failure_Rollback {
 		if ( ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
+		$result      = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$plugin      = $hook_extra['plugin'];
 		$temp_backup = [
 			'temp_backup' => [
@@ -142,7 +143,6 @@ class Auto_Update_Failure_Rollback {
 		\error_log( 'Shutdown caught' );
 		$hook_extra = $args['hook_extra'];
 		$result     = $args['result'];
-		// $result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$this->cron_rollback( $result, $hook_extra );
 	}
 
