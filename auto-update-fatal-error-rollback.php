@@ -7,7 +7,7 @@
  * Plugin Name:       Auto-update Fatal Error Rollback
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
  * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
- * Version:           0.5.3
+ * Version:           0.5.4
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -43,21 +43,22 @@ class Auto_Update_Failure_Rollback {
 
 			// Register exception and shutdown handlers.
 			$handler_args = [
+				'error'      => 'Shutdown Caught',
 				'result'     => $result,
 				'hook_extra' => $hook_extra,
 			];
-			$lambda       = function( $exception ) use ( $handler_args ) {
-				$this->exception_handler( $handler_args );
-			};
-			set_exception_handler( $lambda );
-
-			$lambda2 = function( $error ) use ( $handler_args ) {
-				$this->error_handler( $handler_args );
+			register_shutdown_function( [ $this, 'handler' ], $handler_args );
+			$lambda = function( $error ) use ( $handler_args ) {
+				$handler_args['error'] = 'Error Caught';
+				$this->handler( $handler_args );
 			};
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-			set_error_handler( $lambda2 );
-
-			register_shutdown_function( [ $this, 'shutdown_handler' ], $handler_args );
+			set_error_handler( $lambda );
+			$lambda2 = function( $exception ) use ( $handler_args ) {
+				$handler_args['error'] = 'Exception Caught';
+				$this->handler( $handler_args );
+			};
+			set_exception_handler( $lambda2 );
 
 			$plugin = $hook_extra['plugin'];
 			ob_start();
@@ -136,46 +137,14 @@ class Auto_Update_Failure_Rollback {
 	}
 
 	/**
-	 * Run the Rollback code on PHP fatal.
+	 * Handle errors by running Rollback.
 	 *
 	 * @param array $args Array of args.
 	 *
 	 * @return void
 	 */
-	public function shutdown_handler( $args ) {
-		\error_log( 'Shutdown caught' );
-		$hook_extra = $args['hook_extra'];
-		$result     = $args['result'];
-		$this->cron_rollback( $result, $hook_extra );
-	}
-
-	/**
-	 * Run the Rollback code on PHP fatal.
-	 *
-	 * @param array $args Array of args.
-	 *
-	 * @return void
-	 */
-	public function exception_handler( $args ) {
-		\error_log( 'Exception caught' );
-		restore_exception_handler();
-		$hook_extra = $args['hook_extra'];
-		$result     = $args['result'];
-		$this->cron_rollback( $result, $hook_extra );
-	}
-
-	/**
-	 * Run the Rollback code on PHP fatal.
-	 *
-	 * @param array $args Array of args.
-	 *
-	 * @return void
-	 */
-	public function error_handler( $args ) {
-		\error_log( 'Error caught' );
-		restore_error_handler();
-		$hook_extra = $args['hook_extra'];
-		$result     = $args['result'];
-		$this->cron_rollback( $result, $hook_extra );
+	public function handler( $args ) {
+		\error_log( $args['error'] );
+		$this->cron_rollback( $args['result'], $args['hook_extra'] );
 	}
 }
