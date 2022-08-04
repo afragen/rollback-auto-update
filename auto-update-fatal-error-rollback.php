@@ -39,6 +39,10 @@ class Auto_Update_Failure_Rollback {
 	 * @return array|WP_Error
 	 */
 	public function auto_update_failure_check( $result, $hook_extra ) {
+			$lambda = function( $exception ) use ( $hook_extra ) {
+				$this->exception_handler( $hook_extra );
+			};
+			set_exception_handler( $lambda );
 		register_shutdown_function(
 			[ $this, 'shutdown_handler' ],
 			[
@@ -136,6 +140,18 @@ class Auto_Update_Failure_Rollback {
 	 */
 	public function shutdown_handler( $args ) {
 		$hook_extra = $args['hook_extra'];
+		/**
+		 * Run the Rollback code on PHP fatal.
+		 *
+		 * @param array $args Array of args.
+		 *
+		 * @return void
+		 */
+	public function exception_handler( $args ) {
+		\error_log( 'Exception caught' );
+		restore_exception_handler();
+		$hook_extra = $args['hook_extra'];
+		$result     = $args['result'];
 		$result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$this->cron_rollback( $result, $hook_extra );
 	}
