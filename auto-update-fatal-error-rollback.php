@@ -7,7 +7,7 @@
  * Plugin Name:       Auto-update Fatal Error Rollback
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
  * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
- * Version:           0.5.0
+ * Version:           0.5.1
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -39,17 +39,19 @@ class Auto_Update_Failure_Rollback {
 	 * @return array|WP_Error
 	 */
 	public function auto_update_failure_check( $result, $hook_extra ) {
+		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
+
 			$lambda = function( $exception ) use ( $hook_extra ) {
 				$this->exception_handler( $hook_extra );
 			};
 			set_exception_handler( $lambda );
-		register_shutdown_function(
-			[ $this, 'shutdown_handler' ],
-			[
-				'result'     => $result,
-				'hook_extra' => $hook_extra,
-			]
-		);
+			register_shutdown_function(
+				[ $this, 'shutdown_handler' ],
+				[
+					'result'     => $result,
+					'hook_extra' => $hook_extra,
+				]
+			);
 
 		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
 			$plugin = $hook_extra['plugin'];
@@ -87,6 +89,7 @@ class Auto_Update_Failure_Rollback {
 	 * @return array|WP_Error
 	 */
 	public function cron_rollback( $result, $hook_extra ) {
+		\error_log( 'start cron_rollback' );
 		global $wp_filesystem;
 
 		if ( ! isset( $hook_extra['plugin'] ) ) {
