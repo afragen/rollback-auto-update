@@ -158,7 +158,7 @@ class Auto_Update_Failure_Rollback {
 		restore_exception_handler();
 		$hook_extra = $args['hook_extra'];
 		$result     = $args['result'];
-		$result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
+		//$result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$this->cron_rollback( $result, $hook_extra );
 	}
 }
