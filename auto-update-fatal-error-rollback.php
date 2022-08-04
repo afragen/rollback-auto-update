@@ -7,7 +7,7 @@
  * Plugin Name:       Auto-update Fatal Error Rollback
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
  * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
- * Version:           0.5.1
+ * Version:           0.5.2
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -66,12 +66,8 @@ class Auto_Update_Failure_Rollback {
 			}
 
 			if ( ob_get_length() > 0 ) {
-				$output = ob_get_clean();
-				$result = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ), $output );
-				$this->cron_rollback( $result, $hook_extra );
-			}
-			if ( ob_get_length() > 0 ) {
 				ob_end_clean();
+				$this->cron_rollback( $result, $hook_extra );
 			}
 		}
 
@@ -89,7 +85,6 @@ class Auto_Update_Failure_Rollback {
 	 * @return array|WP_Error
 	 */
 	public function cron_rollback( $result, $hook_extra ) {
-		\error_log( 'start cron_rollback' );
 		global $wp_filesystem;
 
 		if ( ! isset( $hook_extra['plugin'] ) ) {
@@ -161,7 +156,6 @@ class Auto_Update_Failure_Rollback {
 		restore_exception_handler();
 		$hook_extra = $args['hook_extra'];
 		$result     = $args['result'];
-		//$result     = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$this->cron_rollback( $result, $hook_extra );
 	}
 }
