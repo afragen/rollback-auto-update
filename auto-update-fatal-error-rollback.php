@@ -4,7 +4,7 @@
  *
  * @package Rollback_Auto_Update
  *
- * Plugin Name:       Rollback_Auto_Update
+ * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/auto-update-fatal-error-rollback
  * Description:       Check for a PHP error on plugin auto-update and Rollback plugin if one exists.
  * Version:           0.5.5
