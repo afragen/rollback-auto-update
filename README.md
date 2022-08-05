@@ -26,3 +26,7 @@ If you wish to download the zip directly, you will need to unzip, rename the con
 Once installed you will need to change the version number to `0` and comment out the code. After doing this you can activate the plugin, but you can leave it disabled. Set it to _Enable auto-updates_ in the Plugins page.
 
 If the test plugin is active and if the Rollback works, your site should not show a WSOD after the auto-update as the previous, commented plugin will still be the active plugin. You will still show a plugin update.
+
+Plugins bulk update alphabetically based on the slug. Any plugin supposed to update after the fatal will not receive an auto-update until the fatal is fixed.
+
+An email will be sent to the site admin upon an auto-update failure.
