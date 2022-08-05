@@ -1,4 +1,5 @@
 [unreleased]
+* return early if `$hook_extra` not correctly populated
 
 #### 0.5.7 / 2022-08-05
 * update documentation
