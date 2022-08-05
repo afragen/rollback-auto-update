@@ -148,6 +148,7 @@ class Rollback_Auto_Update {
 
 	/**
 	 * Displays fatal error output for sites running PHP < 7.
+	 * Liberally borrowed from John Blackbourn's Query Monitor.
 	 *
 	 * @param array $handler_args Array of data.
 	 *
