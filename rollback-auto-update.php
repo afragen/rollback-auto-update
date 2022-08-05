@@ -7,7 +7,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.5.8
+ * Version:           0.6.0
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -95,7 +95,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @return array|WP_Error
 	 */
-	public function cron_rollback( $result, $hook_extra ) {
+	private function cron_rollback( $result, $hook_extra ) {
 		global $wp_filesystem;
 
 		if ( ! isset( $hook_extra['plugin'] ) ) {
@@ -131,10 +131,6 @@ class Rollback_Auto_Update {
 		// Call Rollback's delete_temp_backup().
 		$delete_temp_backup = new \ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
 		$delete_temp_backup->invoke( $rollback_updater );
-
-		$this->send_fatal_error_email( $hook_extra );
-
-		return $result;
 	}
 
 	/**
@@ -142,14 +138,15 @@ class Rollback_Auto_Update {
 	 *
 	 * @param array $args Array of data.
 	 *
-	 * @return array
+	 * @return void
 	 */
-	public function handler( $args ) {
+	private function handler( $args ) {
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( 'Rollback Auto-Update - ' . $args['error'] . ' in ' . $args['hook_extra']['plugin'] );
 		$args['result']['error'] = $args['error'];
 		$this->errored           = true;
-		return $this->cron_rollback( $args['result'], $args['hook_extra'] );
+		$this->cron_rollback( $args['result'], $args['hook_extra'] );
+		$this->send_fatal_error_email( $args );
 	}
 
 	/**
@@ -160,7 +157,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @return array
 	 */
-	public function shutdown_handler( $handler_args ) {
+	private function shutdown_handler( $handler_args ) {
 
 		$e = error_get_last();
 
@@ -179,18 +176,19 @@ class Rollback_Auto_Update {
 		}
 		$handler_args['error'] = $error;
 
-		return $this->handler( $handler_args );
+		$this->handler( $handler_args );
 	}
 
 	/**
 	 * Sends an email to the site administrator when a plugin
 	 * new version contains a fatal error.
 	 *
-	 * @param array $hook_extra Array of data from hook.
+	 * @param array $args Array of data from hook.
 	 */
-	private function send_fatal_error_email( $hook_extra ) {
-		$name = \get_plugin_data( $hook_extra['temp_backup']['src'] . $hook_extra['plugin'] )['Name'];
-		$body = sprintf(
+	private function send_fatal_error_email( $args ) {
+		$plugin_path = trailingslashit( $args['result']['local_destination'] ) . $args['hook_extra']['plugin'];
+		$name        = \get_plugin_data( $plugin_path )['Name'];
+		$body        = sprintf(
 		/* translators: 1: The name of the plugin or theme. 2: Home URL. */
 			__( 'Howdy! Due to a fatal error, %1$s, failed to automatically update to the latest versions on your site at %2$s. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n" .
 			__( 'Please be aware that some additional auto-updates may not have been performed due the nature of the error seen.' ),
