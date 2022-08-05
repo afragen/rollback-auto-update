@@ -7,7 +7,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.5.6
+ * Version:           0.5.7
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -46,7 +46,7 @@ class Rollback_Auto_Update {
 	 * @return array|WP_Error
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
-		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
+		if ( ! is_wp_error( $result ) && wp_doing_cron() || true ) {
 
 			if ( ! defined( 'QM_ERROR_FATALS' ) ) {
 				define( 'QM_ERROR_FATALS', E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR );
@@ -141,6 +141,8 @@ class Rollback_Auto_Update {
 	 * @return array
 	 */
 	public function handler( $args ) {
+		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( 'Rollback Auto-Update - ' . $args['error'] . ' in ' . $args['hook_extra']['plugin'] );
 		$args['result']['error'] = $args['error'];
 		$this->errored           = true;
 		return $this->cron_rollback( $args['result'], $args['hook_extra'] );
