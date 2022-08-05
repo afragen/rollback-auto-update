@@ -141,12 +141,12 @@ class Rollback_Auto_Update {
 	 * @return void
 	 */
 	private function handler( $args ) {
-		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( 'Rollback Auto-Update - ' . $args['error'] . ' in ' . $args['hook_extra']['plugin'] );
-		$args['result']['error'] = $args['error'];
-		$this->errored           = true;
+		$this->errored = true;
 		$this->cron_rollback( $args['result'], $args['hook_extra'] );
 		$this->send_fatal_error_email( $args );
+
+		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( 'Rollback Auto-Update - ' . $args['error'] . ' in ' . $args['hook_extra']['plugin'] );
 	}
 
 	/**
