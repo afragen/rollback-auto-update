@@ -176,7 +176,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Sends an email to the site administrator when a plugin or theme
+	 * Sends an email to the site administrator when a plugin
 	 * new version contains a fatal error.
 	 *
 	 * @param array $hook_extra Array of data from hook.
