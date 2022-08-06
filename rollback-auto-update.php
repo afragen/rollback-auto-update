@@ -33,13 +33,6 @@ class Rollback_Auto_Update {
 	private $handler_args = [];
 
 	/**
-	 * Has plugin errored on update already?
-	 *
-	 * @var bool
-	 */
-	private $errored = false;
-
-	/**
 	 * Constructor, let's get going.
 	 */
 	public function __construct() {
@@ -59,22 +52,22 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 
-			$result = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
-			$plugin = $hook_extra['plugin'];
+		$result = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
+		$plugin = $hook_extra['plugin'];
 
-			// Register exception and shutdown handlers.
-			$this->handler_args = [
-				'handler_error' => 'Shutdown Caught',
-				'result'        => $result,
-				'hook_extra'    => $hook_extra,
-			];
-			$this->initialize_handlers();
+		// Register exception and shutdown handlers.
+		$this->handler_args = [
+			'handler_error' => 'Shutdown Caught',
+			'result'        => $result,
+			'hook_extra'    => $hook_extra,
+		];
+		$this->initialize_handlers();
 
-			// working parts of `plugin_sandbox_scrape()`.
-			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-			include WP_PLUGIN_DIR . '/' . $plugin;
+		// working parts of `plugin_sandbox_scrape()`.
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
+		include WP_PLUGIN_DIR . '/' . $plugin;
 
-			return $result;
+		return $result;
 	}
 
 	/**
@@ -127,14 +120,13 @@ class Rollback_Auto_Update {
 	 * @return array
 	 */
 	public function shutdown_handler( $handler_args ) {
-
 		$e = error_get_last();
 
 		if ( empty( $e ) || ! ( $e['type'] & QM_ERROR_FATALS ) ) {
 			return;
 		}
 
-		if ( $this->errored ) {
+		if ( 'Shutdown Caught' !== $this->handler_args['handler_error'] ) {
 			return $handler_args['result'];
 		}
 
@@ -157,7 +149,6 @@ class Rollback_Auto_Update {
 	 * @return void
 	 */
 	private function handler( $args ) {
-		$this->errored = true;
 		$this->cron_rollback( $args );
 		$this->send_fatal_error_email( $args );
 	}
