@@ -20,7 +20,8 @@ namespace Fragen;
 
 add_filter(
 	'upgrader_install_package_result',
-	[ __NAMESPACE__ . '\Rollback_Auto_Update', 'init' ],
+	// [ __NAMESPACE__ . '\Rollback_Auto_Update', 'init' ], // Works in WP-Cron, returns error on manual update.
+	[ new Rollback_Auto_Update(), 'auto_update_check' ], // Works in WP-Cron, works in manual update.
 	15,
 	2
 );
