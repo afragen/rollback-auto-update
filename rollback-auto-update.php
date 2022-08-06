@@ -18,13 +18,7 @@
 
 namespace Fragen;
 
-add_filter(
-	'upgrader_install_package_result',
-	// [ __NAMESPACE__ . '\Rollback_Auto_Update', 'init' ], // Works in WP-Cron, returns error on manual update.
-	[ new Rollback_Auto_Update(), 'auto_update_check' ], // Works in WP-Cron, works in manual update.
-	15,
-	2
-);
+new Rollback_Auto_Update();
 
 /**
  * Class Auto_Update_Failure_Check
@@ -46,17 +40,11 @@ class Rollback_Auto_Update {
 	private $errored = false;
 
 	/**
-	 * Let's get going. Needed a static to be called by the hook.
-	 *
-	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
-	 * @param array          $hook_extra Extra arguments passed to hooked filters.
-	 *
-	 * @return void
+	 * Constructor, let's get going.
 	 */
-	public static function init( $result, $hook_extra ) {
-		( new Rollback_Auto_Update() )->auto_update_check( $result, $hook_extra );
+	public function __construct() {
+		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
 	}
-
 
 	/**
 	 * Check validity of updated plugin.
