@@ -1,4 +1,6 @@
 [unreleased]
+* large refactor into smaller chunks
+* load in `__construct()`
 
 #### 0.6.0 / 2022-08-05
 * update documentation
