@@ -20,7 +20,7 @@ namespace Fragen;
 
 add_filter(
 	'upgrader_install_package_result',
-	[ '\Fragen\Rollback_Auto_Update', 'init' ],
+	[ __NAMESPACE__ . '\Rollback_Auto_Update', 'init' ],
 	15,
 	2
 );
