@@ -65,44 +65,25 @@ class Rollback_Auto_Update {
 	 *
 	 * @return array|WP_Error
 	 */
-	private function auto_update_check( $result, $hook_extra ) {
-		// if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
+	public function auto_update_check( $result, $hook_extra ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
-
-		if ( ! defined( 'QM_ERROR_FATALS' ) ) {
-			define( 'QM_ERROR_FATALS', E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR );
-		}
-
-			// if ( ! isset( $hook_extra['plugin'] ) ) {
-			// return $result;
-			// }
 
 			$result = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 			$plugin = $hook_extra['plugin'];
 
 			// Register exception and shutdown handlers.
 			$this->handler_args = [
-				'handler_error'      => 'Shutdown Caught',
-				'result'     => $result,
-				'hook_extra' => $hook_extra,
+				'handler_error' => 'Shutdown Caught',
+				'result'        => $result,
+				'hook_extra'    => $hook_extra,
 			];
 			$this->initialize_handlers();
-			/*
-					  $lambda_error = function( $error ) use ( $handler_args ) {
-				$handler_args['error'] = 'Error Caught';
-				$this->handler( $handler_args );
-			};
-			$lambda_exception = function( $exception ) use ( $handler_args ) {
-				$handler_args['error'] = 'Exception Caught';
-				$this->handler( $handler_args );
-			};
-			*/
+
 			// working parts of `plugin_sandbox_scrape()`.
 			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
 			include WP_PLUGIN_DIR . '/' . $plugin;
-			// }
 
 			return $result;
 	}
@@ -113,6 +94,10 @@ class Rollback_Auto_Update {
 	 * @return void
 	 */
 	private function initialize_handlers() {
+		if ( ! defined( 'QM_ERROR_FATALS' ) ) {
+			define( 'QM_ERROR_FATALS', E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR );
+		}
+
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ QM_ERROR_FATALS ) );
 		set_exception_handler( [ $this, 'exception_handler' ] );
@@ -126,7 +111,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @return void
 	 */
-	private function error_handler( $error ) {
+	public function error_handler( $error ) {
 		$this->handler_args['handler_error'] = 'Error Caught';
 		$this->handler( $this->handler_args );
 	}
@@ -138,10 +123,10 @@ class Rollback_Auto_Update {
 	 *
 	 * @return void
 	 */
-	private function exception_handler( $exception ) {
+	public function exception_handler( $exception ) {
 		$this->handler_args['handler_error'] = 'Exception Caught';
 		$this->handler( $this->handler_args );
-		//exit( 1 );
+		// exit( 1 ); // TODO: do I need this?
 	}
 
 	/**
@@ -152,7 +137,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @return array
 	 */
-	private function shutdown_handler( $handler_args ) {
+	public function shutdown_handler( $handler_args ) {
 
 		$e = error_get_last();
 
@@ -164,12 +149,6 @@ class Rollback_Auto_Update {
 			return $handler_args['result'];
 		}
 
-		//if ( $e['type'] & E_RECOVERABLE_ERROR ) {
-		//	$error = 'Catchable fatal error';
-		//} else {
-		//	$error = 'Fatal error';
-		//}
-		//$handler_args['error'] = $error;
 		$handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
 
 		$this->handler( $handler_args );
@@ -199,15 +178,19 @@ class Rollback_Auto_Update {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
+	 * @param array $args {
+	 *    An array of error data.
+	 *
+	 *    @type string   $error      The error message.
+	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
+	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
+	 * }
+	 *
 	 * @return void
 	 */
 	private function cron_rollback( $args ) {
 		global $wp_filesystem;
 
-		// if ( ! isset( $hook_extra['plugin'] ) ) {
-		// return $result;
-		// }
-		$result      = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$plugin      = $args['hook_extra']['plugin'];
 		$temp_backup = [
 			'temp_backup' => [
@@ -216,7 +199,7 @@ class Rollback_Auto_Update {
 				'src'  => $wp_filesystem->wp_plugins_dir(),
 			],
 		];
-		// $hook_extra  = array_merge( $args['hook_extra'], $temp_backup );
+
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
 
