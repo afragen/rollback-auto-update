@@ -244,7 +244,7 @@ class Rollback_Auto_Update {
 	 */
 	private function log_error_msg( $args ) {
 		$error_msg = sprintf(
-			'Rollback Auto-Update - %1$s in %2$s',
+			'Rollback Auto-Update: %1$s in %2$s',
 			$args['handler_error'],
 			$args['hook_extra']['plugin']
 		);
