@@ -7,7 +7,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.6.0.2
+ * Version:           0.6.0.3
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -223,8 +223,10 @@ class Rollback_Auto_Update {
 		$plugin_path = $wp_filesystem->wp_plugins_dir() . $args['hook_extra']['plugin'];
 		$name        = \get_plugin_data( $plugin_path )['Name'];
 		$body        = sprintf(
-		/* translators: 1: The name of the plugin or theme. 2: Home URL. */
-			__( 'Howdy! Due to a fatal error, %1$s, failed to automatically update to the latest versions on your site at %2$s. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n" .
+			/* translators: 1: The name of the plugin or theme. 2: Home URL. */
+			__( 'Howdy! %1$s was successfully updated on your site at %2$s.' ) . "\n" .
+			/* translators: 1: The name of the plugin or theme. */
+			__( 'However, due to a fatal error, %1$s, was reverted to the previously installed version. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n" .
 			__( 'Please be aware that some additional auto-updates may not have been performed due the nature of the error seen.' ),
 			$name,
 			home_url()
