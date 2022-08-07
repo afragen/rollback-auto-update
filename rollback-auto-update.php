@@ -134,7 +134,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @param array $handler_args Array of data.
 	 *
-	 * @return array|void
+	 * @return void
 	 */
 	public function shutdown_handler( $handler_args ) {
 		$e = error_get_last();
@@ -144,14 +144,12 @@ class Rollback_Auto_Update {
 		}
 
 		if ( 'Shutdown Caught' !== $this->handler_args['handler_error'] ) {
-			return $handler_args['result'];
+			return;
 		}
 
 		$handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
 
 		$this->handler( $handler_args );
-
-		return $handler_args['result'];
 	}
 
 	/**
