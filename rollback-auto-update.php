@@ -7,7 +7,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.6.0.1
+ * Version:           0.6.0.2
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -150,6 +150,7 @@ class Rollback_Auto_Update {
 	 */
 	private function handler( $args ) {
 		$this->cron_rollback( $args );
+		$this->log_error_msg( $args );
 		$this->send_fatal_error_email( $args );
 	}
 
@@ -200,9 +201,6 @@ class Rollback_Auto_Update {
 		// Call Rollback's delete_temp_backup().
 		$delete_temp_backup = new \ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
 		$delete_temp_backup->invoke( $rollback_updater );
-
-		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( 'Rollback Auto-Update - ' . $args['handler_error'] . ' in ' . $args['hook_extra']['plugin'] );
 	}
 
 	/**
@@ -229,5 +227,28 @@ class Rollback_Auto_Update {
 		$body .= "\n\n" . __( 'The WordPress Team' ) . "\n";
 
 		wp_mail( get_bloginfo( 'admin_email' ), __( 'Plugin auto-update failed due to a fatal error' ), $body );
+	}
+
+	/**
+	 * Undocumented function
+	 *
+	 * @param array $args {
+	 *    An array of error data.
+	 *
+	 *    @type string   $error      The error message.
+	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
+	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
+	 * }
+	 *
+	 * @return void
+	 */
+	private function log_error_msg( $args ) {
+		$error_msg = sprintf(
+			'Rollback Auto-Update - %1$s in %2$s',
+			$args['handler_error'],
+			$args['hook_extra']['plugin']
+		);
+		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( $error_msg );
 	}
 }

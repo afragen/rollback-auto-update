@@ -1,4 +1,4 @@
-# Rollback_Auto_Update
+# Rollback Auto Update
 
 * Contributors:      afragen, costdev
 * Author:            WP Core Contributors
