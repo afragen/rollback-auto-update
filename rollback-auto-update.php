@@ -143,19 +143,11 @@ class Rollback_Auto_Update {
 
 	/**
 	 * Handles errors by running Rollback.
-	 *
-	 * @param array $args {
-	 *    An array of error data.
-	 *
-	 *    @type string   $error      The error message.
-	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
-	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
-	 * }
 	 */
-	private function handler( $args ) {
-		$this->cron_rollback( $args );
-		$this->log_error_msg( $args );
-		$this->send_fatal_error_email( $args );
+	private function handler() {
+		$this->cron_rollback( $this->handler_args );
+		$this->log_error_msg( $this->handler_args );
+		$this->send_fatal_error_email( $this->handler_args );
 	}
 
 	/**
