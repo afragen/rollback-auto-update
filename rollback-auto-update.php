@@ -7,7 +7,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.6.0.3
+ * Version:           0.6.0.4
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -108,7 +108,6 @@ class Rollback_Auto_Update {
 	public function exception_handler( $exception ) {
 		$this->handler_args['handler_error'] = 'Exception Caught';
 		$this->handler( $this->handler_args );
-		// exit( 1 ); // TODO: do I need this?
 	}
 
 	/**
@@ -133,6 +132,8 @@ class Rollback_Auto_Update {
 		$handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
 
 		$this->handler( $handler_args );
+
+		return $handler_args['result'];
 	}
 
 	/**
