@@ -102,7 +102,7 @@ class Rollback_Auto_Update {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ $this->error_types ) );
 		set_exception_handler( [ $this, 'exception_handler' ] );
-		register_shutdown_function( [ $this, 'shutdown_handler' ], $this->handler_args );
+		register_shutdown_function( [ $this, 'shutdown_handler' ] );
 	}
 
 	/**
@@ -124,10 +124,8 @@ class Rollback_Auto_Update {
 	/**
 	 * Displays fatal error output for sites running PHP < 7.
 	 * Liberally borrowed from John Blackbourn's Query Monitor.
-	 *
-	 * @param array $handler_args Array of data.
 	 */
-	public function shutdown_handler( $handler_args ) {
+	public function shutdown_handler() {
 		$e = error_get_last();
 
 		if ( empty( $e ) || ! ( $e['type'] & $this->error_types ) ) {
@@ -138,9 +136,9 @@ class Rollback_Auto_Update {
 			return;
 		}
 
-		$handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
+		$this->handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
 
-		$this->handler( $handler_args );
+		$this->handler();
 	}
 
 	/**
