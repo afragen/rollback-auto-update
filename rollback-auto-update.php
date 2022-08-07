@@ -48,7 +48,14 @@ class Rollback_Auto_Update {
 	private $handler_args = [];
 
 	/**
-	 * Let's get started.
+	 * Variable to store error codes.
+	 *
+	 * @var int
+	 */
+	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
+
+	/**
+	 * Constructor, let's get going.
 	 */
 	public function __construct() {
 		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
@@ -94,12 +101,8 @@ class Rollback_Auto_Update {
 	 * @return void
 	 */
 	private function initialize_handlers() {
-		if ( ! defined( 'QM_ERROR_FATALS' ) ) {
-			define( 'QM_ERROR_FATALS', E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR );
-		}
-
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ QM_ERROR_FATALS ) );
+		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ $this->error_types ) );
 		set_exception_handler( [ $this, 'exception_handler' ] );
 		register_shutdown_function( [ $this, 'shutdown_handler' ], $this->handler_args );
 	}
@@ -139,7 +142,7 @@ class Rollback_Auto_Update {
 	public function shutdown_handler( $handler_args ) {
 		$e = error_get_last();
 
-		if ( empty( $e ) || ! ( $e['type'] & QM_ERROR_FATALS ) ) {
+		if ( empty( $e ) || ! ( $e['type'] & $this->error_types ) ) {
 			return;
 		}
 
