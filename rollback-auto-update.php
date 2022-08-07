@@ -134,7 +134,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @param array $handler_args Array of data.
 	 *
-	 * @return array
+	 * @return array|void
 	 */
 	public function shutdown_handler( $handler_args ) {
 		$e = error_get_last();
