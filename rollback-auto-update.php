@@ -41,14 +41,14 @@ if ( ! defined( 'WPINC' ) ) {
 class Rollback_Auto_Update {
 
 	/**
-	 * Variable to store handler parameters.
+	 * Stores handler parameters.
 	 *
 	 * @var array
 	 */
 	private $handler_args = [];
 
 	/**
-	 * Variable to store error codes.
+	 * Stores error codes.
 	 *
 	 * @var int
 	 */
@@ -62,7 +62,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Check validity of updated plugin.
+	 * Checks the validity of the updated plugin.
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
@@ -96,9 +96,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Initialize handlers.
-	 *
-	 * @return void
+	 * Initializes handlers.
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
@@ -108,9 +106,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Error handler function.
-	 *
-	 * @return void
+	 * Handles Errors.
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
@@ -118,9 +114,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Exception handler function.
-	 *
-	 * @return void
+	 * Handles Exceptions.
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
@@ -152,7 +146,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Handle errors by running Rollback.
+	 * Handles errors by running Rollback.
 	 *
 	 * @param array $args {
 	 *    An array of error data.
@@ -171,7 +165,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Rollback during cron.
+	 * Rolls back during cron.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
@@ -255,7 +249,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Undocumented function
+	 * Outputs the handler error to the log file.
 	 *
 	 * @param array $args {
 	 *    An array of error data.
