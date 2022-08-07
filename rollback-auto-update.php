@@ -110,11 +110,9 @@ class Rollback_Auto_Update {
 	/**
 	 * Error handler function.
 	 *
-	 * @param \Error $error Error object.
-	 *
 	 * @return void
 	 */
-	public function error_handler( $error ) {
+	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
 		$this->handler( $this->handler_args );
 	}
