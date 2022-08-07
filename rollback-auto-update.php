@@ -84,7 +84,7 @@ class Rollback_Auto_Update {
 		];
 		$this->initialize_handlers();
 
-		// working parts of `plugin_sandbox_scrape()`.
+		// Working parts of `plugin_sandbox_scrape()`.
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
 		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
 			include WP_PLUGIN_DIR . '/' . $plugin;
