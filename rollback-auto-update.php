@@ -132,7 +132,7 @@ class Rollback_Auto_Update {
 			return;
 		}
 
-		if ( 'Shutdown Caught' !== $this->handler_args['handler_error'] ) {
+		if ( ! empty( $this->handler_args['handler_error'] ) || 'Shutdown Caught' !== $this->handler_args['handler_error'] ) {
 			return;
 		}
 
