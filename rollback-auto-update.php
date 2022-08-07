@@ -209,7 +209,13 @@ class Rollback_Auto_Update {
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 *
-	 * @param array $args Array of data from hook.
+	 * @param array $args {
+	 *    An array of error data.
+	 *
+	 *    @type string   $error      The error message.
+	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
+	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
+	 * }
 	 */
 	private function send_fatal_error_email( $args ) {
 		global $wp_filesystem;
