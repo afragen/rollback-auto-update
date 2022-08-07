@@ -194,19 +194,11 @@ class Rollback_Auto_Update {
 	 * new version contains a fatal error.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 *
-	 * @param array $args {
-	 *    An array of error data.
-	 *
-	 *    @type string   $error      The error message.
-	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
-	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
-	 * }
 	 */
-	private function send_fatal_error_email( $args ) {
+	private function send_fatal_error_email() {
 		global $wp_filesystem;
 
-		$plugin_path = $wp_filesystem->wp_plugins_dir() . $args['hook_extra']['plugin'];
+		$plugin_path = $wp_filesystem->wp_plugins_dir() . $this->handler_args['hook_extra']['plugin'];
 		$name        = \get_plugin_data( $plugin_path )['Name'];
 		$body        = sprintf(
 			__( 'Howdy!' ) . "\n\n" .
