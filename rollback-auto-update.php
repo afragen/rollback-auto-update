@@ -223,8 +223,9 @@ class Rollback_Auto_Update {
 		$plugin_path = $wp_filesystem->wp_plugins_dir() . $args['hook_extra']['plugin'];
 		$name        = \get_plugin_data( $plugin_path )['Name'];
 		$body        = sprintf(
+			__( 'Howdy!' ) . "\n" .
 			/* translators: 1: The name of the plugin or theme. 2: Home URL. */
-			__( 'Howdy! %1$s was successfully updated on your site at %2$s.' ) . "\n" .
+			__( '%1$s was successfully updated on your site at %2$s.' ) . "\n" .
 			/* translators: 1: The name of the plugin or theme. */
 			__( 'However, due to a fatal error, %1$s, was reverted to the previously installed version. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n" .
 			__( 'Please be aware that some additional auto-updates may not have been performed due the nature of the error seen.' ),
