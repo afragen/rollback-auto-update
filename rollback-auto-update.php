@@ -154,19 +154,11 @@ class Rollback_Auto_Update {
 	 * Rolls back during cron.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 *
-	 * @param array $args {
-	 *    An array of error data.
-	 *
-	 *    @type string   $error      The error message.
-	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
-	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
-	 * }
 	 */
-	private function cron_rollback( $args ) {
+	private function cron_rollback() {
 		global $wp_filesystem;
 
-		$plugin      = $args['hook_extra']['plugin'];
+		$plugin      = $this->handler_args['hook_extra']['plugin'];
 		$temp_backup = [
 			'temp_backup' => [
 				'dir'  => 'plugins',
