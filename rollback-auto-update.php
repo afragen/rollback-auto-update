@@ -126,8 +126,6 @@ class Rollback_Auto_Update {
 	 * Liberally borrowed from John Blackbourn's Query Monitor.
 	 *
 	 * @param array $handler_args Array of data.
-	 *
-	 * @return void
 	 */
 	public function shutdown_handler( $handler_args ) {
 		$e = error_get_last();
@@ -155,8 +153,6 @@ class Rollback_Auto_Update {
 	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
 	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
 	 * }
-	 *
-	 * @return void
 	 */
 	private function handler( $args ) {
 		$this->cron_rollback( $args );
@@ -176,8 +172,6 @@ class Rollback_Auto_Update {
 	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
 	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
 	 * }
-	 *
-	 * @return void
 	 */
 	private function cron_rollback( $args ) {
 		global $wp_filesystem;
@@ -258,8 +252,6 @@ class Rollback_Auto_Update {
 	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
 	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
 	 * }
-	 *
-	 * @return void
 	 */
 	private function log_error_msg( $args ) {
 		$error_msg = sprintf(
