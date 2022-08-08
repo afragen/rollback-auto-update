@@ -24,7 +24,7 @@ if ( ! \class_exists( '\\Fragen\\Rollback_Auto_Update' ) ) {
 
 add_filter(
 	'upgrader_install_package_result',
-	[ __NAMESPACE__ . '\\Rollback_Auto_Update', 'auto_update_check' ],
+	[ __NAMESPACE__ . '\\Rollback_Auto_Update', 'init' ],
 	15,
 	2
 );
@@ -40,6 +40,11 @@ class Rollback_Auto_Update {
 	 * @var array
 	 */
 	private $handler_args = [];
+
+	public static function init($result, $hook_extra){
+		$rollback_auto_updater = new Rollback_Auto_Update();
+		$rollback_auto_updater->auto_update_check($result,$hook_extra);
+	}
 
 	/**
 	 * Check validity of updated plugin.
