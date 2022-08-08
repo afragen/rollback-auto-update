@@ -42,10 +42,9 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	require __DIR__ . '/vendor/autoload.php';
 }
 
-$class_instance = Singleton::get_instance('Fragen\Rollback_Auto_Update', new \stdClass());
 add_filter(
 	'upgrader_install_package_result',
-	[ $class_instance, 'auto_update_check' ],
+	[ Singleton::get_instance('Fragen\Rollback_Auto_Update', new \stdClass()), 'auto_update_check' ],
 	15,
 	2
 );
@@ -74,7 +73,7 @@ class Rollback_Auto_Update {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
-
+		$result_saved = $result;
 		$result = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 		$plugin = $hook_extra['plugin'];
 
@@ -88,7 +87,11 @@ class Rollback_Auto_Update {
 
 		// working parts of `plugin_sandbox_scrape()`.
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-		include WP_PLUGIN_DIR . '/' . $plugin;
+		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin){
+			include WP_PLUGIN_DIR . '/' . $plugin;
+		} else {
+			return $result_saved;
+		}
 
 		return $result;
 	}
