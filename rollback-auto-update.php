@@ -87,12 +87,8 @@ class Rollback_Auto_Update {
 		// Working parts of `plugin_sandbox_scrape()`.
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
 		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
-			include WP_PLUGIN_DIR . '/' . $plugin;
+			include_once WP_PLUGIN_DIR . '/' . $plugin;
 		}
-
-		\error_log( 'End of auto_update_check' );
-		return $result;
-		//return new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 	}
 
 	/**
