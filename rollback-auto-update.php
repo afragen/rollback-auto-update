@@ -92,6 +92,7 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 
+		\error_log( 'End of auto_update_check' );
 		return new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 	}
 
