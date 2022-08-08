@@ -159,7 +159,7 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Sends an email to the site administrator when a plugin
+	 * Sends an email to the site administrator when a plugin's
 	 * new version contains a fatal error.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
