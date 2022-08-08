@@ -8,7 +8,46 @@
  * @package rollback-auto-update
  */
 
+/**
+ * Rollback an auto-update containing an activation error.
+ *
+ * @package Rollback_Auto_Update
+ *
+ * Plugin Name:       Rollback Auto-Update
+ * Plugin URI:        https://github.com/afragen/rollback-auto-update
+ * Description:       Rollback an auto-update containing an activation error.
+ * Version:           0.6.0.6
+ * Author:            WP Core Contributors
+ * License:           MIT
+ * Requires at least: 5.9
+ * Requires PHP:      5.6
+ * GitHub Plugin URI: https://github.com/afragen/rollback-auto-update
+ * Primary Branch:    main
+ */
+
 namespace Rollback_Auto_Update;
+
+use Fragen\Singleton;
+
+/*
+ * Exit if called directly.
+ * PHP version check and exit.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+// Load the Composer autoloader.
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require __DIR__ . '/vendor/autoload.php';
+}
+
+add_filter(
+	'upgrader_install_package_result',
+	[ Singleton::get_instance( 'Rollback_Auto_Update' ), 'auto_update_check' ],
+	15,
+	2
+);
 
 /**
  * Class Auto_Update_Failure_Check
@@ -21,15 +60,6 @@ class Rollback_Auto_Update {
 	 * @var array
 	 */
 	private $handler_args = [];
-
-	/**
-	 * Static function to get rolling.
-	 *
-	 * @return void
-	 */
-	public static function init( $result, $hook_extra ) {
-		( new Rollback_Auto_Update() )->auto_update_check( $result, $hook_extra );
-	}
 
 	/**
 	 * Check validity of updated plugin.
