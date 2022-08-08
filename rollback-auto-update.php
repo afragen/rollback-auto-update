@@ -27,6 +27,8 @@
 
 namespace Fragen;
 
+use WP_Automatic_Updater;
+
 /*
  * Exit if called directly.
  * PHP version check and exit.
@@ -148,6 +150,7 @@ class Rollback_Auto_Update {
 		$this->cron_rollback( $this->handler_args );
 		$this->log_error_msg( $this->handler_args );
 		$this->send_fatal_error_email( $this->handler_args );
+		$this->restart_updates( $this->handler_args );
 	}
 
 	/**
@@ -227,6 +230,27 @@ class Rollback_Auto_Update {
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
+	}
+
+	/**
+	 * Restart update process for plugins that remain after a fatal.
+	 *
+	 * @param array $args {
+	 *    An array of error data.
+	 *
+	 *    @type string   $error      The error message.
+	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
+	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
+	 * }
+	 *
+	 * @return void
+	 */
+	private function restart_updates( $handler_args ) {
+		$current = \get_site_transient( 'update_plugins' );
+		unset( $current->response[ $handler_args['hook_extra']['plugin'] ] );
+
+		$skin     = new \Automatic_Upgrader_Skin();
+		$upgrader = new \Plugin_Upgrader( $skin );
 	}
 }
 
