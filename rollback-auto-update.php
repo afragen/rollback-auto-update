@@ -42,12 +42,12 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	require __DIR__ . '/vendor/autoload.php';
 }
 
-add_filter(
-	'upgrader_install_package_result',
-	[ Singleton::get_instance( 'Fragen\Rollback_Auto_Update', new \stdClass() ), 'auto_update_check' ],
-	15,
-	2
-);
+//add_filter(
+//	'upgrader_install_package_result',
+//	[ Singleton::get_instance( 'Fragen\Rollback_Auto_Update', new \stdClass() ), 'auto_update_check' ],
+//	15,
+//	2
+//);
 
 /**
  * Class Auto_Update_Failure_Check
@@ -60,6 +60,11 @@ class Rollback_Auto_Update {
 	 * @var array
 	 */
 	private $handler_args = [];
+
+	public function __construct()
+	{
+	add_filter(	'upgrader_install_package_result',[ $this, 'auto_update_check' ],15,2);
+	}
 
 	/**
 	 * Check validity of updated plugin.
