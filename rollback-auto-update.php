@@ -73,6 +73,7 @@ class Rollback_Auto_Update {
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
+			\error_log($hook_extra['plugin'] . ' updated manually.');
 			return $result;
 		}
 
@@ -91,6 +92,7 @@ class Rollback_Auto_Update {
 		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
 			include_once WP_PLUGIN_DIR . '/' . $plugin;
 		}
+		\error_log($plugin . ' auto-updated');
 	}
 
 	/**
