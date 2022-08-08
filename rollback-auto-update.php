@@ -39,21 +39,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Class Auto_Update_Failure_Check
  */
 class Rollback_Auto_Update {
-
-	/**
-	 * Stores handler parameters.
-	 *
-	 * @var array
-	 */
-	private $handler_args = [];
-
-	/**
-	 * Stores error codes.
-	 *
-	 * @var int
-	 */
-	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
-
 	/**
 	 * Constructor, let's get going.
 	 */
