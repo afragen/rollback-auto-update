@@ -42,9 +42,10 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	require __DIR__ . '/vendor/autoload.php';
 }
 
+$class_instance = Singleton::get_instance('Fragen\Rollback_Auto_Update', new \stdClass());
 add_filter(
 	'upgrader_install_package_result',
-	[ Singleton::get_instance( 'Fragen\Rollback_Auto_Update', new \stdClass() ), 'auto_update_check' ],
+	[ $class_instance, 'auto_update_check' ],
 	15,
 	2
 );
