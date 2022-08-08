@@ -180,8 +180,8 @@ class Rollback_Auto_Update {
 			__( 'Howdy!' ) . "\n\n" .
 			/* translators: 1: The name of the plugin or theme. 2: Home URL. */
 			__( '%1$s was successfully updated on your site at %2$s.' ) . "\n\n" .
-			/* translators: 1: The name of the plugin or theme. */
-			__( 'However, due to a fatal error, %1$s, was reverted to the previously installed version. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n\n" .
+			__( 'However, due to a fatal error, it was reverted to the previously installed version to keep your site running.' ) . ' ' .
+			__( 'If a new version is released without fatal errors, it will be installed automatically.' ) . "\n\n",
 			$name,
 			home_url()
 		);
