@@ -27,8 +27,6 @@
 
 namespace Fragen;
 
-use Fragen\Singleton;
-
 /*
  * Exit if called directly.
  * PHP version check and exit.
@@ -36,18 +34,6 @@ use Fragen\Singleton;
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
-
-// Load the Composer autoloader.
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require __DIR__ . '/vendor/autoload.php';
-}
-
-//add_filter(
-//	'upgrader_install_package_result',
-//	[ Singleton::get_instance( 'Fragen\Rollback_Auto_Update', new \stdClass() ), 'auto_update_check' ],
-//	15,
-//	2
-//);
 
 /**
  * Class Auto_Update_Failure_Check
@@ -61,9 +47,11 @@ class Rollback_Auto_Update {
 	 */
 	private $handler_args = [];
 
-	public function __construct()
-	{
-	add_filter(	'upgrader_install_package_result',[ $this, 'auto_update_check' ],15,2);
+	/**
+	 * Let's get started.
+	 */
+	public function __construct() {
+		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
 	}
 
 	/**
@@ -293,3 +281,5 @@ class Rollback_Auto_Update {
 		error_log( $error_msg );
 	}
 }
+
+new Rollback_Auto_Update();
