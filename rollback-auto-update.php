@@ -171,6 +171,11 @@ class Rollback_Auto_Update {
 
 		$plugin_path = $wp_filesystem->wp_plugins_dir() . $plugin;
 		$name        = \get_plugin_data( $plugin_path )['Name'];
+		$subject     = sprintf(
+			/* translators: %s: The site name. */
+			__( '[%s] A plugin was rolled back to the previously installed version' ),
+			get_bloginfo( 'name' )
+		);
 		$body        = sprintf(
 			__( 'Howdy!' ) . "\n\n" .
 			/* translators: 1: The name of the plugin or theme. 2: Home URL. */
@@ -184,7 +189,7 @@ class Rollback_Auto_Update {
 
 		$body .= "\n\n" . __( 'The WordPress Rollback Team' ) . "\n";
 
-		wp_mail( get_bloginfo( 'admin_email' ), __( 'Plugin auto-update failed due to a fatal error' ), $body );
+		wp_mail( get_bloginfo( 'admin_email' ), $subject, $body );
 	}
 }
 
