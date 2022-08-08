@@ -47,4 +47,6 @@ class Init {
 	}
 }
 
-new Init();
+if ( ! \class_exists(__NAMESPACE__.'\\Init')){
+   new Init();
+}
