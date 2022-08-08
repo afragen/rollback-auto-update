@@ -45,7 +45,7 @@ class Rollback_Auto_Update {
 	 *
 	 * @var array
 	 */
-	private $handler_args = array();
+	private $handler_args = [];
 
 	/**
 	 * Stores error codes.
@@ -58,7 +58,7 @@ class Rollback_Auto_Update {
 	 * Constructor, let's get going.
 	 */
 	public function __construct() {
-		add_filter( 'upgrader_install_package_result', array( $this, 'auto_update_check' ), 15, 2 );
+		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
 	}
 
 	/**
@@ -77,11 +77,11 @@ class Rollback_Auto_Update {
 		$plugin = $hook_extra['plugin'];
 
 		// Register exception and shutdown handlers.
-		$this->handler_args = array(
+		$this->handler_args = [
 			'handler_error' => 'Shutdown Caught',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
-		);
+		];
 		$this->initialize_handlers();
 
 		// Working parts of `plugin_sandbox_scrape()`.
@@ -164,8 +164,8 @@ class Rollback_Auto_Update {
 				'dir'  => 'plugins',
 				'slug' => dirname( $plugin ),
 				'src'  => $wp_filesystem->wp_plugins_dir(),
-			),
-		);
+			],
+		];
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
