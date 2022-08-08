@@ -1,35 +1,14 @@
 <?php
 /**
- * Rollback an auto-update containing an activation error.
+ * Rollback Auto Update
  *
- * @package Rollback_Auto_Update
- *
- * Plugin Name:       Rollback Auto-Update
- * Plugin URI:        https://github.com/afragen/rollback-auto-update
- * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.6.0.6
- * Author:            WP Core Contributors
- * License:           MIT
- * Requires at least: 5.9
- * Requires PHP:      5.6
- * GitHub Plugin URI: https://github.com/afragen/rollback-auto-update
- * Primary Branch:    main
+ * @author  Andy Fragen, Colin Stewart
+ * @license MIT
+ * @link    https://github.com/afragen/rollback-auto-update
+ * @package rollback-auto-update
  */
 
-namespace Fragen;
-
-error_log( 'class check: ' . \class_exists( '\\Fragen\\Rollback_Auto_Update' ));
-
-if ( ! \class_exists( '\\Fragen\\Rollback_Auto_Update' ) ) {
-	new Rollback_Auto_Update();
-}
-
-add_filter(
-	'upgrader_install_package_result',
-	[ __NAMESPACE__ . '\\Rollback_Auto_Update', 'init' ],
-	15,
-	2
-);
+namespace Rollback_Auto_Update;
 
 /**
  * Class Auto_Update_Failure_Check
@@ -43,9 +22,13 @@ class Rollback_Auto_Update {
 	 */
 	private $handler_args = [];
 
-	public static function init($result, $hook_extra){
-		$rollback_auto_updater = new Rollback_Auto_Update();
-		$rollback_auto_updater->auto_update_check($result,$hook_extra);
+	/**
+	 * Static function to get rolling.
+	 *
+	 * @return void
+	 */
+	public static function init( $result, $hook_extra ) {
+		( new Rollback_Auto_Update() )->auto_update_check( $result, $hook_extra );
 	}
 
 	/**
