@@ -1,4 +1,4 @@
-# Rollback_Auto_Update
+# Rollback Auto Update
 
 * Contributors:      afragen, costdev
 * Author:            WP Core Contributors
@@ -17,9 +17,9 @@ The [Rollback Update Failure](https://wordpress.org/plugins/rollback-update-fail
 ## Testing
 To test you must have a plugin that is capable of being updated **and** whose update contains a PHP fatal error or warning upon activation.
 
-The simplest way to test is to download, install, and activate this plugin and [Git Updater](https://git-updater.com). Then install the test plugin, Fatal Plugin, via WP-CLI with the following command. 
+The simplest way to test is to download, install, and activate this plugin and [Git Updater](https://git-updater.com). Then install the test plugin, [Rollback Fatal Plugin](https://github.com/afragen/rollback-fatal-plugin/), via WP-CLI with the following command. 
 
-`wp plugin install https://github.com/afragen/fatal-plugin/archive/refs/heads/main.zip` 
+`wp plugin install https://github.com/afragen/rollback-fatal-plugin/archive/refs/heads/main.zip` 
 
 If you wish to download the zip directly, you will need to unzip, rename the containing folder to remove the `-main`, re-zip, and then install via the Upload Plugin screen.
 

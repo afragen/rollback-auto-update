@@ -1,5 +1,14 @@
 <?php
 /**
+ * Rollback Auto Update
+ *
+ * @author  Andy Fragen, Colin Stewart
+ * @license MIT
+ * @link    https://github.com/afragen/rollback-auto-update
+ * @package rollback-auto-update
+ */
+
+/**
  * Rollback an auto-update containing an activation error.
  *
  * @package Rollback_Auto_Update
@@ -7,7 +16,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.6.0
+ * Version:           0.6.1
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -18,12 +27,13 @@
 
 namespace Fragen;
 
-add_filter(
-	'upgrader_install_package_result',
-	[ new Rollback_Auto_Update(), 'auto_update_check' ],
-	15,
-	2
-);
+/*
+ * Exit if called directly.
+ * PHP version check and exit.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
 
 /**
  * Class Auto_Update_Failure_Check
@@ -31,14 +41,28 @@ add_filter(
 class Rollback_Auto_Update {
 
 	/**
-	 * Has plugin errored on update already?
+	 * Stores handler parameters.
 	 *
-	 * @var bool
+	 * @var array
 	 */
-	private $errored = false;
+	private $handler_args = [];
 
 	/**
-	 * Check validity of updated plugin.
+	 * Stores error codes.
+	 *
+	 * @var int
+	 */
+	public $error_types = E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR;
+
+	/**
+	 * Constructor, let's get going.
+	 */
+	public function __construct() {
+		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
+	}
+
+	/**
+	 * Checks the validity of the updated plugin.
 	 *
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
@@ -46,63 +70,95 @@ class Rollback_Auto_Update {
 	 * @return array|WP_Error
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
-		if ( ! is_wp_error( $result ) && wp_doing_cron() ) {
-
-			if ( ! defined( 'QM_ERROR_FATALS' ) ) {
-				define( 'QM_ERROR_FATALS', E_ERROR | E_PARSE | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR );
-			}
-
-			if ( ! isset( $hook_extra['plugin'] ) ) {
-				return $result;
-			}
-
-			$plugin = $hook_extra['plugin'];
-
-			// Register exception and shutdown handlers.
-			$handler_args = [
-				'error'      => 'Shutdown Caught',
-				'result'     => $result,
-				'hook_extra' => $hook_extra,
-			];
-			$lambda_error = function( $error ) use ( $handler_args ) {
-				$handler_args['error'] = 'Error Caught';
-				$this->handler( $handler_args );
-			};
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-			set_error_handler( $lambda_error, ( E_ALL ^ QM_ERROR_FATALS ) );
-			$lambda_exception = function( $exception ) use ( $handler_args ) {
-				$handler_args['error'] = 'Exception Caught';
-				$this->handler( $handler_args );
-			};
-			set_exception_handler( $lambda_exception );
-			register_shutdown_function( [ $this, 'shutdown_handler' ], $handler_args );
-
-			// working parts of `plugin_sandbox_scrape()`.
-			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-			include WP_PLUGIN_DIR . '/' . $plugin;
+		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
+			return $result;
 		}
 
-		return $result;
+		$plugin = $hook_extra['plugin'];
+
+		// Register exception and shutdown handlers.
+		$this->handler_args = [
+			'handler_error' => 'Shutdown Caught',
+			'result'        => $result,
+			'hook_extra'    => $hook_extra,
+		];
+		$this->initialize_handlers();
+
+		// Working parts of `plugin_sandbox_scrape()`.
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
+		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
+			include WP_PLUGIN_DIR . '/' . $plugin;
+		} else {
+			return $result;
+		}
+
+		return new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 	}
 
 	/**
-	 * Rollback during cron.
+	 * Initializes handlers.
+	 */
+	private function initialize_handlers() {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ $this->error_types ) );
+		set_exception_handler( [ $this, 'exception_handler' ] );
+		register_shutdown_function( [ $this, 'shutdown_handler' ] );
+	}
+
+	/**
+	 * Handles Errors.
+	 */
+	public function error_handler() {
+		$this->handler_args['handler_error'] = 'Error Caught';
+		$this->handler( $this->handler_args );
+	}
+
+	/**
+	 * Handles Exceptions.
+	 */
+	public function exception_handler() {
+		$this->handler_args['handler_error'] = 'Exception Caught';
+		$this->handler( $this->handler_args );
+	}
+
+	/**
+	 * Displays fatal error output for sites running PHP < 7.
+	 * Liberally borrowed from John Blackbourn's Query Monitor.
+	 */
+	public function shutdown_handler() {
+		$e = error_get_last();
+
+		if ( empty( $e ) || ! ( $e['type'] & $this->error_types ) ) {
+			return;
+		}
+
+		if ( ! empty( $this->handler_args['handler_error'] ) || 'Shutdown Caught' !== $this->handler_args['handler_error'] ) {
+			return;
+		}
+
+		$this->handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
+
+		$this->handler();
+	}
+
+	/**
+	 * Handles errors by running Rollback.
+	 */
+	private function handler() {
+		$this->cron_rollback( $this->handler_args );
+		$this->log_error_msg( $this->handler_args );
+		$this->send_fatal_error_email( $this->handler_args );
+	}
+
+	/**
+	 * Rolls back during cron.
 	 *
 	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
-	 *
-	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
-	 * @param array          $hook_extra Extra arguments passed to hooked filters.
-	 *
-	 * @return array|WP_Error
 	 */
-	private function cron_rollback( $result, $hook_extra ) {
+	private function cron_rollback() {
 		global $wp_filesystem;
 
-		if ( ! isset( $hook_extra['plugin'] ) ) {
-			return $result;
-		}
-		$result      = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
-		$plugin      = $hook_extra['plugin'];
+		$plugin      = $this->handler_args['hook_extra']['plugin'];
 		$temp_backup = [
 			'temp_backup' => [
 				'dir'  => 'plugins',
@@ -110,7 +166,7 @@ class Rollback_Auto_Update {
 				'src'  => $wp_filesystem->wp_plugins_dir(),
 			],
 		];
-		$hook_extra  = array_merge( $hook_extra, $temp_backup );
+
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
 
@@ -134,70 +190,44 @@ class Rollback_Auto_Update {
 	}
 
 	/**
-	 * Handle errors by running Rollback.
-	 *
-	 * @param array $args Array of data.
-	 *
-	 * @return void
-	 */
-	private function handler( $args ) {
-		$this->errored = true;
-		$this->cron_rollback( $args['result'], $args['hook_extra'] );
-		$this->send_fatal_error_email( $args );
-
-		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-		error_log( 'Rollback Auto-Update - ' . $args['error'] . ' in ' . $args['hook_extra']['plugin'] );
-	}
-
-	/**
-	 * Displays fatal error output for sites running PHP < 7.
-	 * Liberally borrowed from John Blackbourn's Query Monitor.
-	 *
-	 * @param array $handler_args Array of data.
-	 *
-	 * @return array
-	 */
-	private function shutdown_handler( $handler_args ) {
-
-		$e = error_get_last();
-
-		if ( empty( $e ) || ! ( $e['type'] & QM_ERROR_FATALS ) ) {
-			return;
-		}
-
-		if ( $this->errored ) {
-			return $handler_args['result'];
-		}
-
-		if ( $e['type'] & E_RECOVERABLE_ERROR ) {
-			$error = 'Catchable fatal error';
-		} else {
-			$error = 'Fatal error';
-		}
-		$handler_args['error'] = $error;
-
-		$this->handler( $handler_args );
-	}
-
-	/**
 	 * Sends an email to the site administrator when a plugin
 	 * new version contains a fatal error.
 	 *
-	 * @param array $args Array of data from hook.
+	 * @global WP_Filesystem_Base $wp_filesystem WordPress filesystem subclass.
 	 */
-	private function send_fatal_error_email( $args ) {
-		$plugin_path = trailingslashit( $args['result']['local_destination'] ) . $args['hook_extra']['plugin'];
+	private function send_fatal_error_email() {
+		global $wp_filesystem;
+
+		$plugin_path = $wp_filesystem->wp_plugins_dir() . $this->handler_args['hook_extra']['plugin'];
 		$name        = \get_plugin_data( $plugin_path )['Name'];
 		$body        = sprintf(
-		/* translators: 1: The name of the plugin or theme. 2: Home URL. */
-			__( 'Howdy! Due to a fatal error, %1$s, failed to automatically update to the latest versions on your site at %2$s. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n" .
+			__( 'Howdy!' ) . "\n\n" .
+			/* translators: 1: The name of the plugin or theme. 2: Home URL. */
+			__( '%1$s was successfully updated on your site at %2$s.' ) . "\n\n" .
+			/* translators: 1: The name of the plugin or theme. */
+			__( 'However, due to a fatal error, %1$s, was reverted to the previously installed version. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n\n" .
 			__( 'Please be aware that some additional auto-updates may not have been performed due the nature of the error seen.' ),
 			$name,
 			home_url()
 		);
 
-		$body .= "\n\n" . __( 'The WordPress Team' ) . "\n";
+		$body .= "\n\n" . __( 'The WordPress Rollback Team' ) . "\n";
 
 		wp_mail( get_bloginfo( 'admin_email' ), __( 'Plugin auto-update failed due to a fatal error' ), $body );
 	}
+
+	/**
+	 * Outputs the handler error to the log file.
+	 */
+	private function log_error_msg() {
+		$error_msg = sprintf(
+			'Rollback Auto-Update: %1$s in %2$s',
+			$this->handler_args['handler_error'],
+			$this->handler_args['hook_extra']['plugin']
+		);
+		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		error_log( $error_msg );
+	}
 }
+
+new Rollback_Auto_Update();
