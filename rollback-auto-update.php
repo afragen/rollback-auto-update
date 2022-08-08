@@ -44,7 +44,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 
 add_filter(
 	'upgrader_install_package_result',
-	[ Singleton::get_instance('Fragen\Rollback_Auto_Update', new \stdClass()), 'auto_update_check' ],
+	[ Singleton::get_instance( 'Fragen\Rollback_Auto_Update', new \stdClass() ), 'auto_update_check' ],
 	15,
 	2
 );
@@ -74,8 +74,8 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 		$result_saved = $result;
-		$result = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
-		$plugin = $hook_extra['plugin'];
+		$result       = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
+		$plugin       = $hook_extra['plugin'];
 
 		// Register exception and shutdown handlers.
 		$this->handler_args = [
@@ -87,7 +87,7 @@ class Rollback_Auto_Update {
 
 		// working parts of `plugin_sandbox_scrape()`.
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin){
+		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
 			include WP_PLUGIN_DIR . '/' . $plugin;
 		} else {
 			return $result_saved;
