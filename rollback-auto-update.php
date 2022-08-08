@@ -66,9 +66,8 @@ class Rollback_Auto_Update {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
-		$result_saved = $result;
-		$result       = new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
-		$plugin       = $hook_extra['plugin'];
+
+		$plugin = $hook_extra['plugin'];
 
 		// Register exception and shutdown handlers.
 		$this->handler_args = [
@@ -83,10 +82,10 @@ class Rollback_Auto_Update {
 		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
 			include WP_PLUGIN_DIR . '/' . $plugin;
 		} else {
-			return $result_saved;
+			return $result;
 		}
 
-		return $result;
+		return new \WP_Error( 'unexpected_output', __( 'The plugin generated unexpected output.' ) );
 	}
 
 	/**
