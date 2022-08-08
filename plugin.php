@@ -40,7 +40,7 @@ class Init {
 		require_once __DIR__ . '/rollback-auto-update.php';
 		add_filter(
 			'upgrader_install_package_result',
-			[ 'Rollback_Auto_Update', 'init' ],
+			[ __NAMESPACE__ . '\\Rollback_Auto_Update', 'init' ],
 			15,
 			2
 		);
