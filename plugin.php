@@ -46,3 +46,5 @@ class Init {
 		);
 	}
 }
+
+new Init();
