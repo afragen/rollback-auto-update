@@ -1,4 +1,6 @@
 [unreleased]
+
+#### 0.7.0 / 2022-08-07
 * large refactor into smaller chunks
 * load in `__construct()`
 * update error email message
