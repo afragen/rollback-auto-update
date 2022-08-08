@@ -52,7 +52,7 @@ class Rollback_Auto_Update {
 	 * @param array|WP_Error $result     Result from WP_Upgrader::install_package().
 	 * @param array          $hook_extra Extra arguments passed to hooked filters.
 	 *
-	 * @return array|WP_Error
+	 * @return array|WP_Error The result from WP_Upgrader::install_package(), or a WP_Error object.
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
