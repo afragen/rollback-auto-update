@@ -18,6 +18,8 @@
 
 namespace Fragen;
 
+error_log( 'class check: ' . \class_exists( '\\Fragen\\Rollback_Auto_Update' ));
+
 if ( ! \class_exists( '\\Fragen\\Rollback_Auto_Update' ) ) {
 	new Rollback_Auto_Update();
 }
