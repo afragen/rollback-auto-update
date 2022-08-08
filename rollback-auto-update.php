@@ -25,7 +25,7 @@
  * Primary Branch:    main
  */
 
-namespace Rollback_Auto_Update;
+namespace Fragen;
 
 use Fragen\Singleton;
 
@@ -44,7 +44,7 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 
 add_filter(
 	'upgrader_install_package_result',
-	[ Singleton::get_instance( 'Rollback_Auto_Update' ), 'auto_update_check' ],
+	[ Singleton::get_instance( 'Fragen\Rollback_Auto_Update', new \stdClass() ), 'auto_update_check' ],
 	15,
 	2
 );
