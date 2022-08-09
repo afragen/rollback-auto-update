@@ -197,20 +197,21 @@ class Rollback_Auto_Update {
 
 		$plugin_path = $wp_filesystem->wp_plugins_dir() . $this->handler_args['hook_extra']['plugin'];
 		$name        = \get_plugin_data( $plugin_path )['Name'];
+		$subject     = __( 'A plugin was rolled back to the previously installed version' );
 		$body        = sprintf(
 			__( 'Howdy!' ) . "\n\n" .
 			/* translators: 1: The name of the plugin or theme. 2: Home URL. */
-			__( '%1$s was successfully updated on your site at %2$s.' ) . "\n\n" .
-			/* translators: 1: The name of the plugin or theme. */
-			__( 'However, due to a fatal error, %1$s, was reverted to the previously installed version. If a new version is released without fatal errors, it will be installed automatically.' ) . "\n\n" .
-			__( 'Please be aware that some additional auto-updates may not have been performed due the nature of the error seen.' ),
+			__( '%1$s was successfully updated on your site, [%2$s], at %3$s.' ) . "\n\n" .
+			__( 'However, due to a fatal error, it was reverted to the previously installed version to keep your site running.' ) . ' ' .
+			__( 'If a new version is released without fatal errors, it will be installed automatically.' ) . "\n\n",
 			$name,
+			get_bloginfo( 'name' ),
 			home_url()
 		);
 
-		$body .= "\n\n" . __( 'The WordPress Rollback Team' ) . "\n";
+		$body .= __( 'The WordPress Rollback Team' ) . "\n";
 
-		wp_mail( get_bloginfo( 'admin_email' ), __( 'Plugin auto-update failed due to a fatal error' ), $body );
+		wp_mail( get_bloginfo( 'admin_email' ), $subject, $body );
 	}
 
 	/**
