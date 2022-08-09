@@ -72,7 +72,7 @@ class Rollback_Auto_Update {
 	public function auto_update_check( $result, $hook_extra ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			if ( isset( $hook_extra['plugin'] ) ) {
-				set_site_transient( 'processed_auto_updates', $hook_extra['plugin'], 600 );
+				set_site_transient( 'processed_auto_updates', $hook_extra['plugin'], 300 );
 			}
 			return $result;
 		}
@@ -247,7 +247,7 @@ class Rollback_Auto_Update {
 		$fatal_plugins   = (array) \get_site_transient( 'processed_auto_updates', [] );
 		$fatal_plugins[] = $this->handler_args['hook_extra']['plugin'];
 		$fatal_plugins   = array_unique( $fatal_plugins );
-		\set_site_transient( 'processed_auto_updates', $fatal_plugins, 600 );
+		\set_site_transient( 'processed_auto_updates', $fatal_plugins, 300 );
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', [] );
