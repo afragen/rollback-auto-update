@@ -27,8 +27,6 @@
 
 namespace Fragen;
 
-use WP_Automatic_Updater;
-
 /*
  * Exit if called directly.
  * PHP version check and exit.
@@ -229,29 +227,38 @@ class Rollback_Auto_Update {
 
 	/**
 	 * Restart update process for plugins that remain after a fatal.
-	 *
-	 * @param array $handler_args {
-	 *    An array of error data.
-	 *
-	 *    @type string   $error      The error message.
-	 *    @type WP_Error $result     Generic WP_Error reporting unexpected output.
-	 *    @type array    $hook_extra Extra arguments that were passed to hooked filters.
-	 * }
-	 *
-	 * @return void
 	 */
-	private function restart_updates( $handler_args ) {
+	private function restart_updates() {
+		$remaining_auto_updates = $this->get_remaining_auto_updates();
+
+		$skin     = new \Automatic_Upgrader_Skin();
+		$upgrader = new \Plugin_Upgrader( $skin );
+		$upgrader->bulk_upgrade( $remaining_auto_updates );
+	}
+
+	/**
+	 * Get array of non-fataling auto-updates remaining.
+	 *
+	 * @return array
+	 */
+	private function get_remaining_auto_updates() {
+		$fatal_plugins   = \get_site_transient( 'rollback_fatal_plugins', [] );
+		$fatal_plugins[] = $this->handler_args['hook_extra']['plugin'];
+		$fatal_plugins   = array_unique( $fatal_plugins );
+		\set_site_transient( 'rollback_fatal_plugins', $fatal_plugins, 600 );
+
 		// Get array of plugins set for auto-updating.
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', [] );
 		$current      = \get_site_transient( 'update_plugins' );
 		$plugins      = array_keys( $current->response );
+
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $plugins );
-		unset( $current_auto_updates[ $handler_args['hook_extra']['plugin'] ] );
 
-		$skin     = new \Automatic_Upgrader_Skin();
-		$upgrader = new \Plugin_Upgrader( $skin );
-		$upgrader->bulk_upgrade( $current_auto_updates );
+		// Get array of non-fatal auto-updates remaining.
+		$remaining_auto_updates = array_diff( $current_auto_updates, $fatal_plugins );
+
+		return $remaining_auto_updates;
 	}
 }
 
