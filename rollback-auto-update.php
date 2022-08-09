@@ -245,7 +245,7 @@ class Rollback_Auto_Update {
 	 * @return array
 	 */
 	private function get_remaining_auto_updates() {
-		$fatal_plugins   = \get_site_transient( 'processed_auto_updates', [] );
+		$fatal_plugins   = (array) \get_site_transient( 'processed_auto_updates', [] );
 		$fatal_plugins[] = $this->handler_args['hook_extra']['plugin'];
 		$fatal_plugins   = array_unique( $fatal_plugins );
 		\set_site_transient( 'processed_auto_updates', $fatal_plugins, 600 );
