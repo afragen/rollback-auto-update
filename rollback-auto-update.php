@@ -244,14 +244,14 @@ class Rollback_Auto_Update {
 	 * @return array
 	 */
 	private function get_remaining_auto_updates() {
-		$fatal_plugins   = (array) \get_site_transient( 'processed_auto_updates', [] );
+		$fatal_plugins   = get_site_transient( 'processed_auto_updates' );
 		$fatal_plugins[] = $this->handler_args['hook_extra']['plugin'];
 		$fatal_plugins   = array_unique( $fatal_plugins );
-		\set_site_transient( 'processed_auto_updates', $fatal_plugins, 300 );
+		set_site_transient( 'processed_auto_updates', $fatal_plugins, 300 );
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', [] );
-		$current      = \get_site_transient( 'update_plugins' );
+		$current      = get_site_transient( 'update_plugins' );
 		$plugins      = array_keys( $current->response );
 
 		// Get all auto-updating plugins that have updates available.
