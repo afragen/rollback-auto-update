@@ -76,20 +76,19 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 
-		$plugin = $hook_extra['plugin'];
-
 		// Register exception and shutdown handlers.
 		$this->handler_args = [
 			'handler_error' => 'Shutdown Caught',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
 		];
+
 		$this->initialize_handlers();
 
 		// Working parts of `plugin_sandbox_scrape()`.
-		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $plugin );
-		if ( 'rollback-auto-update/rollback-auto-update.php' !== $plugin ) {
-			include_once WP_PLUGIN_DIR . '/' . $plugin;
+		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
+		if ( 'rollback-auto-update/rollback-auto-update.php' !== $hook_extra['plugin'] ) {
+			include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 		}
 	}
 
@@ -108,7 +107,7 @@ class Rollback_Auto_Update {
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
-		$this->handler( $this->handler_args );
+		$this->handler();
 	}
 
 	/**
@@ -116,7 +115,7 @@ class Rollback_Auto_Update {
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		$this->handler( $this->handler_args );
+		$this->handler();
 	}
 
 	/**
@@ -143,10 +142,10 @@ class Rollback_Auto_Update {
 	 * Handles errors by running Rollback.
 	 */
 	private function handler() {
-		$this->cron_rollback( $this->handler_args );
-		$this->log_error_msg( $this->handler_args );
-		$this->send_fatal_error_email( $this->handler_args );
-		$this->restart_updates( $this->handler_args );
+		$this->cron_rollback();
+		$this->log_error_msg();
+		$this->send_fatal_error_email();
+		$this->restart_updates();
 	}
 
 	/**
@@ -157,11 +156,10 @@ class Rollback_Auto_Update {
 	private function cron_rollback() {
 		global $wp_filesystem;
 
-		$plugin      = $this->handler_args['hook_extra']['plugin'];
 		$temp_backup = [
 			'temp_backup' => [
 				'dir'  => 'plugins',
-				'slug' => dirname( $plugin ),
+				'slug' => dirname( $this->handler_args['hook_extra']['plugin'] ),
 				'src'  => $wp_filesystem->wp_plugins_dir(),
 			],
 		];
