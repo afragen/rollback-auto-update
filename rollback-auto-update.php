@@ -233,9 +233,8 @@ class Rollback_Auto_Update {
 	 */
 	private function restart_updates() {
 		$remaining_auto_updates = $this->get_remaining_auto_updates();
-
-		$skin     = new \Automatic_Upgrader_Skin();
-		$upgrader = new \Plugin_Upgrader( $skin );
+		$skin                   = new \Automatic_Upgrader_Skin();
+		$upgrader               = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
 	}
 
