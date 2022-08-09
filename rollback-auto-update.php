@@ -244,13 +244,11 @@ class Rollback_Auto_Update {
 	private function restart_updates( $handler_args ) {
 		// Get array of plugins set for auto-updating.
 		$auto_updates = (array) get_site_option( 'auto_update_plugins', [] );
-		unset( $auto_updates[ $handler_args['hook_extra']['plugin'] ] );
-		$current = \get_site_transient( 'update_plugins' );
-		unset( $current->response[ $handler_args['hook_extra']['plugin'] ] );
-		// TODO: do we need to save the transient?
-		$plugins = array_keys( $current->response );
+		$current      = \get_site_transient( 'update_plugins' );
+		$plugins      = array_keys( $current->response );
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $plugins );
+		unset( $current_auto_updates[ $handler_args['hook_extra']['plugin'] ] );
 
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
