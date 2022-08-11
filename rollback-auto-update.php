@@ -88,6 +88,9 @@ class Rollback_Auto_Update {
 		if ( 'rollback-auto-update/rollback-auto-update.php' !== $hook_extra['plugin'] ) {
 			include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 		}
+
+
+		return $result;
 	}
 
 	/**
