@@ -100,7 +100,7 @@ class Rollback_Auto_Update {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ $this->error_types ) );
 		set_exception_handler( [ $this, 'exception_handler' ] );
-		register_shutdown_function( [ $this, 'shutdown_handler' ] );
+		// register_shutdown_function( [ $this, 'shutdown_handler' ] );
 	}
 
 	/**
