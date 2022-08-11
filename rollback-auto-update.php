@@ -71,9 +71,6 @@ class Rollback_Auto_Update {
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
-			if ( isset( $hook_extra['plugin'] ) ) {
-				set_site_transient( 'processed_auto_updates', $hook_extra['plugin'], 300 );
-			}
 			return $result;
 		}
 
@@ -220,9 +217,10 @@ class Rollback_Auto_Update {
 	 */
 	private function log_error_msg() {
 		$error_msg = sprintf(
-			'Rollback Auto-Update: %1$s in %2$s',
+			'Rollback Auto-Update: %1$s in %2$s, error type %3$s',
 			$this->handler_args['handler_error'],
-			$this->handler_args['hook_extra']['plugin']
+			$this->handler_args['hook_extra']['plugin'],
+			empty( error_get_last() ) ? 'fatal' : error_get_last()['type']
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
