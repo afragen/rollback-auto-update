@@ -150,10 +150,19 @@ class Rollback_Auto_Update {
 	 * Handles errors by running Rollback.
 	 */
 	private function handler() {
+		$e = error_get_last();
+		// error_log('last error: '. \var_export($e,true));
+		if ( ! empty( $e ) && E_WARNING === $e['type'] ) {
+			// error_log('return on warning: '. $this->handler_args['hook_extra']['plugin']);
+			return;
+		}
+		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ] );
+
 		$this->cron_rollback();
 		$this->log_error_msg();
 		$this->send_fatal_error_email();
 		$this->restart_updates();
+		return;
 	}
 
 	/**
