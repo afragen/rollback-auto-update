@@ -74,16 +74,13 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 
-		$processed = get_site_transient( 'processed_auto_updates' );
-		$processed = is_array( $processed ) ? $processed : [];
-		// error_log( 'processed1: ' . var_export( $processed, true ) );
-
 		// Register exception and shutdown handlers.
 		$this->handler_args = [
 			'handler_error' => '',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
 		];
+		$processed          = (array) get_site_transient( 'processed_auto_updates' );
 
 		$this->initialize_handlers();
 
@@ -93,9 +90,10 @@ class Rollback_Auto_Update {
 			include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 		}
 
-		// \error_log( $hook_extra['plugin'] . ' auto updated ' );// . \var_export( $result, true ) );
 		$processed[] = $hook_extra['plugin'];
 		set_site_transient( 'processed_auto_updates', $processed, 60 );
+
+		\error_log( $hook_extra['plugin'] . ' auto updated ' );
 
 		return $result;
 	}
@@ -151,13 +149,14 @@ class Rollback_Auto_Update {
 	 * Handles errors by running Rollback.
 	 */
 	private function handler() {
+		// Exit for non-fatal errors.
 		$e = error_get_last();
-		// error_log('last error: '. \var_export($e,true));
 		if ( ! empty( $e ) && E_WARNING === $e['type'] ) {
-			// error_log('return on warning: '. $this->handler_args['hook_extra']['plugin']);
+			error_log( 'return on warning: ' . $this->handler_args['hook_extra']['plugin'] );
+			error_log( 'last error: ' . \var_export( $e, true ) );
 			return;
 		}
-		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ] );
+		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ], 60 );
 
 		$this->cron_rollback();
 		$this->log_error_msg();
@@ -254,7 +253,7 @@ class Rollback_Auto_Update {
 		$skin                   = new \Automatic_Upgrader_Skin();
 		$upgrader               = new \Plugin_Upgrader( $skin );
 		if ( ! empty( $remaining_auto_updates ) ) {
-			// \error_log( 'Plugin_Upgrader::bulk_upgrade' . "\n" . var_export( $remaining_auto_updates, true ) );
+			 \error_log( 'Plugin_Upgrader::bulk_upgrade' . "\n" . var_export( $remaining_auto_updates, true ) );
 			$upgrader->bulk_upgrade( $remaining_auto_updates );
 		}
 	}
@@ -270,28 +269,23 @@ class Rollback_Auto_Update {
 		}
 		$processed = (array) get_site_transient( 'processed_auto_updates' );
 		$fatals    = (array) get_site_transient( 'rollback_fatal_plugin' );
-		// $processed = is_array( $processed ) ? $processed : [];
-		// error_log( 'processed2: ' . var_export( $processed, true ) );
-		// $processed[] = $this->handler_args['hook_extra']['plugin'];
-		// $processed   = array_unique( $processed );
-		// set_site_transient( 'processed_auto_updates', $processed, 60 );
 
 		// Get array of plugins set for auto-updating.
-		$auto_updates = (array) get_site_option( 'auto_update_plugins', [] );
-		$current      = get_site_transient( 'update_plugins' );
-		$plugins      = array_keys( $current->response );
+		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
+		$current         = get_site_transient( 'update_plugins' );
+		$current_plugins = array_keys( $current->response );
 
 		// Get all auto-updating plugins that have updates available.
-		$current_auto_updates = array_intersect( $auto_updates, $plugins );
-		// error_log( 'current_auto_updates ' . var_export( $current_auto_updates, true ) );
-		// error_log( 'fatals ' . var_export( $fatals, true ) );
+		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
+		error_log( 'current_auto_updates ' . var_export( $current_auto_updates, true ) );
+		error_log( 'fatals ' . var_export( $fatals, true ) );
 
 		// Get array of non-fatal auto-updates remaining.
 		$remaining_auto_updates = array_diff( $current_auto_updates, $processed, $fatals );
 
 		$processed = array_unique( array_merge( $processed, $remaining_auto_updates ) );
 		\set_site_transient( 'processed_auto_updates', $processed, 60 );
-		// error_log( 'remaining_auto_updates ' . var_export( $remaining_auto_updates, true ) );
+		error_log( 'remaining_auto_updates ' . var_export( $remaining_auto_updates, true ) );
 
 		return $remaining_auto_updates;
 	}
