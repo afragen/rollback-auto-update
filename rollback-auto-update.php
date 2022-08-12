@@ -105,7 +105,6 @@ class Rollback_Auto_Update {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ $this->error_types ) );
 		set_exception_handler( [ $this, 'exception_handler' ] );
-		// register_shutdown_function( [ $this, 'shutdown_handler' ] );
 	}
 
 	/**
@@ -121,27 +120,6 @@ class Rollback_Auto_Update {
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		$this->handler();
-	}
-
-	/**
-	 * Displays fatal error output for sites running PHP < 7.
-	 * Liberally borrowed from John Blackbourn's Query Monitor.
-	 */
-	public function shutdown_handler() {
-		$e = error_get_last();
-
-		if ( empty( $e ) || ! ( $e['type'] & $this->error_types ) ) {
-			return;
-		}
-
-		if ( empty( $this->handler_args['handler_error'] ) || 'Shutdown Caught' !== $this->handler_args['handler_error'] ) {
-			return;
-		}
-
-		$this->handler_args['handler_error'] = $e['type'] & E_RECOVERABLE_ERROR ? 'Recoverable fatal error' : 'Fatal error';
-
-		\error_log( 'Running hander() from shutdown_handler()' );
 		$this->handler();
 	}
 
