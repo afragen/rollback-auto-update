@@ -155,7 +155,7 @@ class Rollback_Auto_Update {
 		// error_log('last error: '. \var_export($e,true));
 		if ( ! empty( $e ) && E_WARNING === $e['type'] ) {
 			// error_log('return on warning: '. $this->handler_args['hook_extra']['plugin']);
-			return;
+			return $this->handler_args['result'];
 		}
 		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ] );
 
