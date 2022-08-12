@@ -59,17 +59,6 @@ class Rollback_Auto_Update {
 	 */
 	public function __construct() {
 		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
-
-		// This should fire after automatic updates and log results.
-		// Info for why success emails not firing.
-		add_action(
-			'automatic_updates_complete',
-			function( $results ) {
-				error_log( 'automatic_updates_complete: ' . \var_export( $results, true ) );
-			},
-			10,
-			1
-		);
 	}
 
 	/**
