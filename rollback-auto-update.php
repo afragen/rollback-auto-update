@@ -232,12 +232,74 @@ class Rollback_Auto_Update {
 	 */
 	private function restart_updates() {
 		$remaining_auto_updates = $this->get_remaining_auto_updates();
+
+		if ( empty( $remaining_auto_updates ) ) {
+			// Time to notify the site administrator.
+			$this->send_update_result_email();
+			return;
+		}
+
 		$skin                   = new \Automatic_Upgrader_Skin();
 		$upgrader               = new \Plugin_Upgrader( $skin );
-		if ( ! empty( $remaining_auto_updates ) ) {
-			 \error_log( 'Plugin_Upgrader::bulk_upgrade' . "\n" . var_export( $remaining_auto_updates, true ) );
-			$upgrader->bulk_upgrade( $remaining_auto_updates );
+		\error_log( 'Plugin_Upgrader::bulk_upgrade' . "\n" . var_export( $remaining_auto_updates, true ) );
+		$upgrader->bulk_upgrade( $remaining_auto_updates );
+	}
+
+	/**
+	 * Sends an email noting successful and failed updates.
+	 */
+	private function send_update_result_email() {
+		$processed      = (array) get_site_transient( 'processed_auto_updates' );
+		$fatals         = (array) get_site_transient( 'rollback_fatal_plugin' );
+		$update_plugins = get_site_transient( 'update_plugins' );
+
+		$successful = $failed = [];
+
+		/*
+		 * Using `get_plugin_data()` instead has produced warnings/errors
+		 * as the files may not be in place at this time.
+		 */
+		$plugins = get_plugins();
+
+		foreach ( $update_plugins->response as $k => $update ) {
+			$item = $update_plugins->response[ $k ];
+			$name = $plugins[ $update->plugin ]['Name'];
+			
+			/*
+			 * This appears to be the only way to get a plugin's older version
+			 * at this stage of an auto-update when not implementing this
+			 * feature directly in Core.
+			 */
+			$current_version = $update_plugins->checked[ $update->plugin ];
+
+			/*
+			 * The `current_version` property does not exist yet. Add it.
+			 * 
+			 * `$update_plugins->response[ $k ]` is an instance of `stdClass`,
+			 * so this should not fall victim to PHP 8.2's deprecation of
+			 * dynamic properties.
+			 */
+			$item->current_version = $current_version;
+
+			$plugin_result = (object) array(
+				'name' => $name,
+				'item' => $item,
+			);
+
+			if ( in_array( $update->plugin, $processed, true ) ) {
+				$successful['plugin'][] = $plugin_result;
+				continue;
+			}
+			
+			if ( in_array( $update->plugin, $fatals, true ) ) {
+				$failed['plugin'][] = $plugin_result;
+			}
 		}
+			
+		$automatic_upgrader      = new \WP_Automatic_Updater();
+		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
+		$send_plugin_theme_email->setAccessible( true );
+		$send_plugin_theme_email->invoke( $automatic_upgrader, 'success', $successful, $failed );
 	}
 
 	/**
