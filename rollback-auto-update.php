@@ -190,6 +190,10 @@ class Rollback_Auto_Update {
 	private function send_fatal_error_email() {
 		global $wp_filesystem;
 
+		if ( ! isset( $this->handler_args['hook_extra']['plugin'] ) ) {
+			return;
+		}
+
 		$plugin_path = $wp_filesystem->wp_plugins_dir() . $this->handler_args['hook_extra']['plugin'];
 		$name        = \get_plugin_data( $plugin_path )['Name'];
 		$subject     = __( 'A plugin was rolled back to the previously installed version' );
