@@ -129,9 +129,9 @@ class Rollback_Auto_Update {
 	private function handler() {
 		// Exit for non-fatal errors.
 		$e = error_get_last();
-		if ( ! empty( $e ) && E_WARNING === $e['type'] ) {
-			error_log( 'return on warning: ' . $this->handler_args['hook_extra']['plugin'] );
-			error_log( 'last error: ' . \var_export( $e, true ) );
+		if ( ! empty( $e ) && $this->error_types !== $e['type'] ) {
+			error_log( 'return on non-fatal error: ' . $this->handler_args['hook_extra']['plugin'] );
+			error_log( 'non-fatal error: ' . \var_export( $e, true ) );
 			return;
 		}
 		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ], 60 );
@@ -265,7 +265,7 @@ class Rollback_Auto_Update {
 		foreach ( $update_plugins->response as $k => $update ) {
 			$item = $update_plugins->response[ $k ];
 			$name = $plugins[ $update->plugin ]['Name'];
-			
+
 			/*
 			 * This appears to be the only way to get a plugin's older version
 			 * at this stage of an auto-update when not implementing this
@@ -275,7 +275,7 @@ class Rollback_Auto_Update {
 
 			/*
 			 * The `current_version` property does not exist yet. Add it.
-			 * 
+			 *
 			 * `$update_plugins->response[ $k ]` is an instance of `stdClass`,
 			 * so this should not fall victim to PHP 8.2's deprecation of
 			 * dynamic properties.
@@ -291,12 +291,12 @@ class Rollback_Auto_Update {
 				$successful['plugin'][] = $plugin_result;
 				continue;
 			}
-			
+
 			if ( in_array( $update->plugin, $fatals, true ) ) {
 				$failed['plugin'][] = $plugin_result;
 			}
 		}
-			
+
 		$automatic_upgrader      = new \WP_Automatic_Updater();
 		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
