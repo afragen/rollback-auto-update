@@ -240,8 +240,8 @@ class Rollback_Auto_Update {
 			return;
 		}
 
-		$skin                   = new \Automatic_Upgrader_Skin();
-		$upgrader               = new \Plugin_Upgrader( $skin );
+		$skin     = new \Automatic_Upgrader_Skin();
+		$upgrader = new \Plugin_Upgrader( $skin );
 		\error_log( 'Plugin_Upgrader::bulk_upgrade' . "\n" . var_export( $remaining_auto_updates, true ) );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
 	}
@@ -282,10 +282,10 @@ class Rollback_Auto_Update {
 			 */
 			$item->current_version = $current_version;
 
-			$plugin_result = (object) array(
+			$plugin_result = (object) [
 				'name' => $name,
 				'item' => $item,
-			);
+			];
 
 			if ( in_array( $update->plugin, $processed, true ) ) {
 				$successful['plugin'][] = $plugin_result;
