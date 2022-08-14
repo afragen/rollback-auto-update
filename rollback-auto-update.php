@@ -16,7 +16,7 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.6.2
+ * Version:           0.6.3
  * Author:            WP Core Contributors
  * License:           MIT
  * Requires at least: 5.9
@@ -130,8 +130,8 @@ class Rollback_Auto_Update {
 		// Exit for non-fatal errors.
 		$e = error_get_last();
 		if ( ! empty( $e ) && $this->error_types !== $e['type'] ) {
-			error_log( 'return on non-fatal error: ' . $this->handler_args['hook_extra']['plugin'] );
-			error_log( 'non-fatal error: ' . \var_export( $e, true ) );
+			// error_log( 'return on non-fatal error: ' . $this->handler_args['hook_extra']['plugin'] );
+			// error_log( 'non-fatal error: ' . \var_export( $e, true ) );
 			return;
 		}
 		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ], 60 );
@@ -139,6 +139,7 @@ class Rollback_Auto_Update {
 		$this->cron_rollback();
 		$this->log_error_msg( $e );
 		$this->restart_updates();
+		$this->send_update_result_email();
 		return;
 	}
 
@@ -238,7 +239,7 @@ class Rollback_Auto_Update {
 
 		if ( empty( $remaining_auto_updates ) ) {
 			// Time to notify the site administrator.
-			$this->send_update_result_email();
+			// $this->send_update_result_email();
 			return;
 		}
 
@@ -258,6 +259,7 @@ class Rollback_Auto_Update {
 
 		$successful = $failed = [];
 
+		\error_log( 'send_update_result_email: ' . \var_export( $processed, true ) );
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
 		 * as the files may not be in place at this time.
