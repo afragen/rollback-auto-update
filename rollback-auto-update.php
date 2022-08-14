@@ -138,7 +138,6 @@ class Rollback_Auto_Update {
 
 		$this->cron_rollback();
 		$this->log_error_msg();
-		$this->send_fatal_error_email();
 		$this->restart_updates();
 		return;
 	}
@@ -179,6 +178,8 @@ class Rollback_Auto_Update {
 		// Call Rollback's delete_temp_backup().
 		$delete_temp_backup = new \ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
 		$delete_temp_backup->invoke( $rollback_updater );
+
+		$this->send_fatal_error_email();
 	}
 
 	/**
