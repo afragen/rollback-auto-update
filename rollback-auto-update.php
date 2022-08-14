@@ -74,7 +74,6 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 
-		// Register exception and shutdown handlers.
 		$this->handler_args = [
 			'handler_error' => '',
 			'result'        => $result,
@@ -82,6 +81,7 @@ class Rollback_Auto_Update {
 		];
 		$processed          = (array) get_site_transient( 'processed_auto_updates' );
 
+		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
 
 		// Working parts of `plugin_sandbox_scrape()`.
