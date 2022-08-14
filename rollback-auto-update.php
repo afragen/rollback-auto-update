@@ -137,7 +137,7 @@ class Rollback_Auto_Update {
 		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ], 60 );
 
 		$this->cron_rollback();
-		$this->log_error_msg();
+		$this->log_error_msg( $e );
 		$this->restart_updates();
 		return;
 	}
@@ -216,13 +216,15 @@ class Rollback_Auto_Update {
 
 	/**
 	 * Outputs the handler error to the log file.
+	 *
+	 * @param array $e Error code.
 	 */
-	private function log_error_msg() {
+	private function log_error_msg( $e ) {
 		$error_msg = sprintf(
 			'Rollback Auto-Update: %1$s in %2$s, error type %3$s',
 			$this->handler_args['handler_error'],
 			$this->handler_args['hook_extra']['plugin'],
-			empty( error_get_last() ) ? 'fatal' : error_get_last()['type']
+			empty( $e ) ? 'fatal' : $e['type']
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
