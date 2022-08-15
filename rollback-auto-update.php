@@ -212,7 +212,7 @@ class Rollback_Auto_Update {
 
 		$body .= __( 'The WordPress Rollback Team' ) . "\n";
 
-		wp_mail( get_bloginfo( 'admin_email' ), wp_specialchars_decode( $subject ), $body );
+		wp_mail( get_bloginfo( 'admin_email' ), $subject, $body );
 	}
 
 	/**
