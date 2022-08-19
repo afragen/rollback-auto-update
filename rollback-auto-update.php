@@ -48,6 +48,13 @@ class Rollback_Auto_Update {
 	private $handler_args = [];
 
 	/**
+	 * Stores `update_plugins` transient.
+	 *
+	 * @var \stdClass
+	 */
+	private $current;
+
+	/**
 	 * Stores error codes.
 	 *
 	 * @var int
@@ -74,6 +81,7 @@ class Rollback_Auto_Update {
 			return $result;
 		}
 
+		$this->current      = get_site_transient( 'update_plugins' );
 		$this->handler_args = [
 			'handler_error' => '',
 			'result'        => $result,
@@ -255,7 +263,6 @@ class Rollback_Auto_Update {
 	private function send_update_result_email() {
 		$processed      = (array) get_site_transient( 'processed_auto_updates' );
 		$fatals         = (array) get_site_transient( 'rollback_fatal_plugin' );
-		$update_plugins = get_site_transient( 'update_plugins' );
 
 		$successful = $failed = [];
 
@@ -266,8 +273,8 @@ class Rollback_Auto_Update {
 		 */
 		$plugins = get_plugins();
 
-		foreach ( $update_plugins->response as $k => $update ) {
-			$item = $update_plugins->response[ $k ];
+		foreach ( $this->current->response as $k => $update ) {
+			$item = $this->current->response[ $k ];
 			$name = $plugins[ $update->plugin ]['Name'];
 
 			/*
@@ -275,12 +282,12 @@ class Rollback_Auto_Update {
 			 * at this stage of an auto-update when not implementing this
 			 * feature directly in Core.
 			 */
-			$current_version = $update_plugins->checked[ $update->plugin ];
+			$current_version = $this->current->checked[ $update->plugin ];
 
 			/*
 			 * The `current_version` property does not exist yet. Add it.
 			 *
-			 * `$update_plugins->response[ $k ]` is an instance of `stdClass`,
+			 * `$this->current->response[ $k ]` is an instance of `stdClass`,
 			 * so this should not fall victim to PHP 8.2's deprecation of
 			 * dynamic properties.
 			 */
@@ -321,8 +328,7 @@ class Rollback_Auto_Update {
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
-		$current         = get_site_transient( 'update_plugins' );
-		$current_plugins = array_keys( $current->response );
+		$current_plugins = array_keys( $this->current->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
