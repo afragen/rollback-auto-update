@@ -261,12 +261,12 @@ class Rollback_Auto_Update {
 	 * Sends an email noting successful and failed updates.
 	 */
 	private function send_update_result_email() {
-		$processed      = (array) get_site_transient( 'processed_auto_updates' );
-		$fatals         = (array) get_site_transient( 'rollback_fatal_plugin' );
-
+		$processed  = array_unique( array_filter( (array) get_site_transient( 'processed_auto_updates' ) ) );
+		$fatals     = (array) get_site_transient( 'rollback_fatal_plugin' );
 		$successful = $failed = [];
 
-		\error_log( 'send_update_result_email: ' . \var_export( $processed, true ) );
+		\error_log( 'send_update_result_email processed: ' . \var_export( $processed, true ) );
+		\error_log( 'send_update_result_email fatals: ' . \var_export( $fatals, true ) );
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
 		 * as the files may not be in place at this time.
@@ -311,7 +311,7 @@ class Rollback_Auto_Update {
 		$automatic_upgrader      = new \WP_Automatic_Updater();
 		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
-		$send_plugin_theme_email->invoke( $automatic_upgrader, 'success', $successful, $failed );
+		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
 	}
 
 	/**
