@@ -88,7 +88,7 @@ class WP_Rollback_Auto_Update {
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
 
-		// Working parts of `plugin_sandbox_scrape()`.
+		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		if ( 'rollback-auto-update/rollback-auto-update.php' !== $hook_extra['plugin'] ) {
 			include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
@@ -143,7 +143,6 @@ class WP_Rollback_Auto_Update {
 		$this->log_error_msg( $e );
 		$this->restart_updates();
 		$this->send_update_result_email();
-		return;
 	}
 
 	/**
@@ -254,7 +253,8 @@ class WP_Rollback_Auto_Update {
 	 * Sends an email noting successful and failed updates.
 	 */
 	private function send_update_result_email() {
-		$successful      = $failed = [];
+		$successful      = [];
+		$failed          = [];
 		$this->processed = array_unique( $this->processed );
 
 		\error_log( 'send_update_result_email processed: ' . \var_export( $this->processed, true ) );
