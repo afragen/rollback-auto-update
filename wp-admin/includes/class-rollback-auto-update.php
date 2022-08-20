@@ -96,8 +96,6 @@ class WP_Rollback_Auto_Update {
 
 		$this->processed[] = $hook_extra['plugin'];
 
-		\error_log( $hook_extra['plugin'] . ' auto updated ' );
-
 		return $result;
 	}
 
@@ -133,8 +131,6 @@ class WP_Rollback_Auto_Update {
 		// Exit for non-fatal errors.
 		$e = error_get_last();
 		if ( ! empty( $e ) && $this->error_types !== $e['type'] ) {
-			// error_log( 'return on non-fatal error: ' . $this->handler_args['hook_extra']['plugin'] );
-			// error_log( 'non-fatal error: ' . \var_export( $e, true ) );
 			return;
 		}
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
@@ -245,7 +241,6 @@ class WP_Rollback_Auto_Update {
 
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
-		\error_log( 'Plugin_Upgrader::bulk_upgrade' . "\n" . var_export( $remaining_auto_updates, true ) );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
 	}
 
@@ -257,8 +252,6 @@ class WP_Rollback_Auto_Update {
 		$failed          = [];
 		$this->processed = array_unique( $this->processed );
 
-		\error_log( 'send_update_result_email processed: ' . \var_export( $this->processed, true ) );
-		\error_log( 'send_update_result_email fatals: ' . \var_export( $this->fatals, true ) );
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
 		 * as the files may not be in place at this time.
@@ -322,14 +315,11 @@ class WP_Rollback_Auto_Update {
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
-		error_log( 'current_auto_updates ' . var_export( $current_auto_updates, true ) );
-		error_log( 'fatals ' . var_export( $this->fatals, true ) );
 
 		// Get array of non-fatal auto-updates remaining.
 		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
 
 		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
-		error_log( 'remaining_auto_updates ' . var_export( $remaining_auto_updates, true ) );
 
 		return $remaining_auto_updates;
 	}
