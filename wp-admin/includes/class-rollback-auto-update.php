@@ -20,6 +20,20 @@ class WP_Rollback_Auto_Update {
 	private $handler_args = [];
 
 	/**
+	 * Stores successfully updated plugins.
+	 *
+	 * @var array
+	 */
+	private $processed = [];
+
+	/**
+	 * Stores fataling plugins.
+	 *
+	 * @var array
+	 */
+	private $fatals = [];
+
+	/**
 	 * Stores `update_plugins` transient.
 	 *
 	 * @var \stdClass
@@ -70,7 +84,6 @@ class WP_Rollback_Auto_Update {
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
 		];
-		$processed          = (array) get_site_transient( 'processed_auto_updates' );
 
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
@@ -81,8 +94,7 @@ class WP_Rollback_Auto_Update {
 			include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 		}
 
-		$processed[] = $hook_extra['plugin'];
-		set_site_transient( 'processed_auto_updates', $processed, 60 );
+		$this->processed[] = $hook_extra['plugin'];
 
 		\error_log( $hook_extra['plugin'] . ' auto updated ' );
 
@@ -125,7 +137,7 @@ class WP_Rollback_Auto_Update {
 			// error_log( 'non-fatal error: ' . \var_export( $e, true ) );
 			return;
 		}
-		set_site_transient( 'rollback_fatal_plugin', [ $this->handler_args['hook_extra']['plugin'] ], 60 );
+		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
 		$this->log_error_msg( $e );
@@ -242,12 +254,11 @@ class WP_Rollback_Auto_Update {
 	 * Sends an email noting successful and failed updates.
 	 */
 	private function send_update_result_email() {
-		$processed  = array_unique( array_filter( (array) get_site_transient( 'processed_auto_updates' ) ) );
-		$fatals     = (array) get_site_transient( 'rollback_fatal_plugin' );
-		$successful = $failed = [];
+		$successful      = $failed = [];
+		$this->processed = array_unique( $this->processed );
 
-		\error_log( 'send_update_result_email processed: ' . \var_export( $processed, true ) );
-		\error_log( 'send_update_result_email fatals: ' . \var_export( $fatals, true ) );
+		\error_log( 'send_update_result_email processed: ' . \var_export( $this->processed, true ) );
+		\error_log( 'send_update_result_email fatals: ' . \var_export( $this->fatals, true ) );
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
 		 * as the files may not be in place at this time.
@@ -279,12 +290,12 @@ class WP_Rollback_Auto_Update {
 				'item' => $item,
 			];
 
-			if ( in_array( $update->plugin, $processed, true ) ) {
+			if ( in_array( $update->plugin, $this->processed, true ) ) {
 				$successful['plugin'][] = $plugin_result;
 				continue;
 			}
 
-			if ( in_array( $update->plugin, $fatals, true ) ) {
+			if ( in_array( $update->plugin, $this->fatals, true ) ) {
 				$failed['plugin'][] = $plugin_result;
 			}
 		}
@@ -304,8 +315,6 @@ class WP_Rollback_Auto_Update {
 		if ( empty( $this->handler_args ) ) {
 			return [];
 		}
-		$processed = (array) get_site_transient( 'processed_auto_updates' );
-		$fatals    = (array) get_site_transient( 'rollback_fatal_plugin' );
 
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
@@ -314,13 +323,12 @@ class WP_Rollback_Auto_Update {
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
 		error_log( 'current_auto_updates ' . var_export( $current_auto_updates, true ) );
-		error_log( 'fatals ' . var_export( $fatals, true ) );
+		error_log( 'fatals ' . var_export( $this->fatals, true ) );
 
 		// Get array of non-fatal auto-updates remaining.
-		$remaining_auto_updates = array_diff( $current_auto_updates, $processed, $fatals );
+		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
 
-		$processed = array_unique( array_merge( $processed, $remaining_auto_updates ) );
-		\set_site_transient( 'processed_auto_updates', $processed, 60 );
+		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
 		error_log( 'remaining_auto_updates ' . var_export( $remaining_auto_updates, true ) );
 
 		return $remaining_auto_updates;
