@@ -1,23 +1,14 @@
 <?php
 /**
- * Rollback Auto Update
+ * WordPress Plugin Administration API: WP_Rollback_Auto_Update class
  *
- * @author  Andy Fragen, Colin Stewart
- * @license MIT
- * @link    https://github.com/afragen/rollback-auto-update
- * @package rollback-auto-update
+ * @package WordPress
+ * @subpackage Administration
+ * @since 6.2.0
  */
-
-/*
- * Exit if called directly.
- * PHP version check and exit.
- */
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
 
 /**
- * Class Rollback_Auto_Update
+ * Core class for rolling back auto-update plugin failures.
  */
 class WP_Rollback_Auto_Update {
 
