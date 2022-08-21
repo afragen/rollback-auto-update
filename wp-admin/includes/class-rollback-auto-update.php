@@ -41,6 +41,13 @@ class WP_Rollback_Auto_Update {
 	private $current;
 
 	/**
+	 * Stores plugin activation status.
+	 *
+	 * @var bool
+	 */
+	private $is_active = false;
+
+	/**
 	 * Stores error codes.
 	 *
 	 * @var int
@@ -84,15 +91,41 @@ class WP_Rollback_Auto_Update {
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
 		];
+		$this->is_active    = is_plugin_active( $hook_extra['plugin'] );
 
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
 
+		if ( ! is_multisite() ) {
+			$active_plugins = get_option( 'active_plugins', [] );
+			$found          = array_search( $hook_extra['plugin'], $active_plugins );
+			if ( false !== $found ) {
+				unset( $active_plugins[ $found ] );
+			}
+			// unset( $active_plugins( array_search( $hook_extra['plugin'], $active_plugins ) ) );
+			update_option( 'active_plugins', $active_plugins );
+		} else {
+			$active_plugins_network = get_site_option( 'active_sitewide_plugins', [] );
+			$found                  = array_search( $hook_extra['plugin'], $active_plugins_network );
+			if ( false !== $found ) {
+				unset( $active_plugins_network[ $found ] );
+			}
+			update_site_option( 'active_sitewide_plugins', $active_plugins_network );
+		}
+
+		error_log( '$is_active ' . var_export( $this->is_active, true ) );
+		error_log( 'plugin active ' . var_export( is_plugin_active( $hook_extra['plugin'] ), true ) );
+
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
+		if ( $this->is_active ) {
+			activate_plugin( $hook_extra['plugin'] );
+		}
 
 		$this->processed[] = $hook_extra['plugin'];
+		error_log( $hook_extra['plugin'] . ' auto updated.' );
+		error_log( 'plugin active ' . var_export( is_plugin_active( $hook_extra['plugin'] ), true ) );
 
 		return $result;
 	}
@@ -129,6 +162,7 @@ class WP_Rollback_Auto_Update {
 		// Exit for non-fatal errors.
 		$e = error_get_last();
 		if ( ! empty( $e ) && $this->error_types !== $e['type'] ) {
+			error_log( $this->handler_args['hook_extra']['plugin'] . var_export( $e, true ) );
 			return;
 		}
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
@@ -137,6 +171,10 @@ class WP_Rollback_Auto_Update {
 		$this->log_error_msg( $e );
 		$this->restart_updates();
 		$this->send_update_result_email();
+		if ( $this->is_active ) {
+			activate_plugin( $this->handler_args['hook_extra']['plugin'] );
+			error_log( 'rollback active: ' . is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) );
+		}
 	}
 
 	/**
@@ -319,6 +357,8 @@ class WP_Rollback_Auto_Update {
 
 		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
 
+		error_log( 'fatals ' . var_export( $this->fatals, true ) );
+		error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
 		return $remaining_auto_updates;
 	}
 }
