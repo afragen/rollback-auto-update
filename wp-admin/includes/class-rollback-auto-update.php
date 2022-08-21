@@ -134,7 +134,8 @@ class WP_Rollback_Auto_Update {
 					'_wpnonce' => $nonce,
 				],
 				admin_url( 'plugins.php' )
-			)
+			),
+			[ 'timeout' => 10 ]
 		);
 
 		if ( is_wp_error( $response ) ) {
