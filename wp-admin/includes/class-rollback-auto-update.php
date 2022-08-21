@@ -103,7 +103,7 @@ class WP_Rollback_Auto_Update {
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
 		$this->processed[] = $hook_extra['plugin'];
-		error_log( $hook_extra['plugin'] . ' auto updated.' );
+		error_log( $hook_extra['plugin'] . ' auto updated, $errors: ' . var_export( $errors, true ) );
 
 		return $result;
 	}
@@ -146,6 +146,7 @@ class WP_Rollback_Auto_Update {
 
 		$code = wp_remote_retrieve_response_code( $response );
 		$body = wp_remote_retrieve_body( $response );
+		error_log( $plugin . ' check_plugin_for_errors code: ' . var_export( $code, true ) );
 
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
 			$errors = new \WP_Error(
@@ -315,7 +316,6 @@ class WP_Rollback_Auto_Update {
 	private function send_update_result_email() {
 		$successful = [];
 		$failed     = [];
-		// $this->processed = array_unique( $this->processed );
 
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
