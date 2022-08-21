@@ -90,7 +90,7 @@ class WP_Rollback_Auto_Update {
 
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
-		include_once WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
+		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
 		$this->processed[] = $hook_extra['plugin'];
 
