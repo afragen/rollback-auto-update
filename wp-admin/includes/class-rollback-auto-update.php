@@ -139,8 +139,9 @@ class WP_Rollback_Auto_Update {
 		);
 
 		if ( is_wp_error( $response ) ) {
-			// If it isn't possible to run the check, assume all is well.
-			return $errors;
+			// If it isn't possible to run the check, assume an error.
+			error_log( $plugin . ' check_plugin_for_errors response: ' . var_export( $response, true ) );
+			throw new \Exception( $response->get_error_message() );
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
