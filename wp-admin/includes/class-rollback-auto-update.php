@@ -96,21 +96,9 @@ class WP_Rollback_Auto_Update {
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
 
-		if ( ! is_multisite() ) {
-			$active_plugins = get_option( 'active_plugins', [] );
-			$found          = array_search( $hook_extra['plugin'], $active_plugins );
-			if ( false !== $found ) {
-				unset( $active_plugins[ $found ] );
-			}
-			// unset( $active_plugins( array_search( $hook_extra['plugin'], $active_plugins ) ) );
-			update_option( 'active_plugins', $active_plugins );
-		} else {
-			$active_plugins_network = get_site_option( 'active_sitewide_plugins', [] );
-			$found                  = array_search( $hook_extra['plugin'], $active_plugins_network );
-			if ( false !== $found ) {
-				unset( $active_plugins_network[ $found ] );
-			}
-			update_site_option( 'active_sitewide_plugins', $active_plugins_network );
+		if ( is_plugin_active( $hook_extra['plugin'] ) ) {
+			// Deactivate the plugin silently, Prevent deactivation hooks from running.
+			deactivate_plugins( $hook_extra['plugin'], true );
 		}
 
 		error_log( '$is_active ' . var_export( $this->is_active, true ) );
