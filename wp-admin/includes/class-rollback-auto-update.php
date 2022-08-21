@@ -98,6 +98,7 @@ class WP_Rollback_Auto_Update {
 
 		$errors = $this->check_plugin_for_errors( $hook_extra['plugin'] );
 
+		// This needed for inactive plugins that fatal.
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
