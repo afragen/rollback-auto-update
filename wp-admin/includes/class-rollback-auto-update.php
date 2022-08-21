@@ -119,6 +119,11 @@ class WP_Rollback_Auto_Update {
 	 * @return WP_Error|true A WP_Error object if an error occured, otherwise true.
 	 */
 	private function check_plugin_for_errors( $plugin ) {
+		global $wp_filesystem;
+
+		if ( file_exists( ABSPATH . '.maintenance' ) ) {
+			$wp_filesystem->delete( ABSPATH . '.maintenance' );
+		}
 		$errors   = false;
 		$nonce    = wp_create_nonce( 'plugin-activation-error_' . $plugin );
 		$response = wp_remote_get(
