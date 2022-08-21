@@ -143,11 +143,9 @@ class WP_Rollback_Auto_Update {
 		}
 
 		$body = wp_remote_retrieve_body( $response );
+		error_log( 'alternate body: ' . var_export( $body, true ) );
 
 		if ( str_contains( $body, 'wp-die-message' ) ) {
-			$this->cron_rollback( $plugin );
-			$this->send_fatal_error_email( $plugin );
-
 			$errors = new \WP_Error(
 				'new_version_error',
 				sprintf(
@@ -156,6 +154,7 @@ class WP_Rollback_Auto_Update {
 					\get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
 				)
 			);
+			throw new \Exception( $errors->get_error_message() );
 		}
 
 		return $errors;
