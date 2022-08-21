@@ -104,6 +104,8 @@ class WP_Rollback_Auto_Update {
 		error_log( '$is_active ' . var_export( $this->is_active, true ) );
 		error_log( 'plugin active ' . var_export( is_plugin_active( $hook_extra['plugin'] ), true ) );
 
+		$errors = $this->check_plugin_for_errors( $hook_extra['plugin'] );
+
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
@@ -116,6 +118,54 @@ class WP_Rollback_Auto_Update {
 		error_log( 'plugin active ' . var_export( is_plugin_active( $hook_extra['plugin'] ), true ) );
 
 		return $result;
+	}
+
+	/**
+	 * Checks a new plugin version for errors.
+	 *
+	 * If an error is found, the previously installed version will be reinstalled
+	 * and an email will be sent to the site administrator.
+	 *
+	 * @param string $plugin The plugin to check.
+	 *
+	 * @return WP_Error|true A WP_Error object if an error occured, otherwise true.
+	 */
+	private function check_plugin_for_errors( $plugin ) {
+		$errors   = false;
+		$nonce    = wp_create_nonce( 'plugin-activation-error_' . $plugin );
+		$response = wp_remote_get(
+			add_query_arg(
+				[
+					'action'   => 'error_scrape',
+					'plugin'   => $plugin,
+					'_wpnonce' => $nonce,
+				],
+				admin_url( 'plugins.php' )
+			)
+		);
+
+		if ( is_wp_error( $response ) ) {
+			// If it isn't possible to run the check, assume all is well.
+			return $errors;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( str_contains( $body, 'wp-die-message' ) ) {
+			$this->cron_rollback( $plugin );
+			$this->send_fatal_error_email( $plugin );
+
+			$errors = new \WP_Error(
+				'new_version_error',
+				sprintf(
+					/* translators: %s: The name of the plugin. */
+					__( 'The new version of %s contains an error' ),
+					\get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
+				)
+			);
+		}
+
+		return $errors;
 	}
 
 	/**
