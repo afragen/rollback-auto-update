@@ -192,7 +192,7 @@ class WP_Rollback_Auto_Update {
 		// Exit for non-fatal errors.
 		$e = error_get_last();
 		if ( ! empty( $e ) && $this->error_types !== $e['type'] ) {
-			error_log( $this->handler_args['hook_extra']['plugin'] . var_export( $e, true ) );
+			error_log( $this->handler_args['hook_extra']['plugin'] . ' ' . var_export( $e, true ) );
 			return;
 		}
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
@@ -301,6 +301,7 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 
+		error_log( 'restart Plugin_Upgrader::bulk_upgrade ' . var_export( $remaining_auto_updates, true ) );
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
@@ -310,9 +311,9 @@ class WP_Rollback_Auto_Update {
 	 * Sends an email noting successful and failed updates.
 	 */
 	private function send_update_result_email() {
-		$successful      = [];
-		$failed          = [];
-		$this->processed = array_unique( $this->processed );
+		$successful = [];
+		$failed     = [];
+		// $this->processed = array_unique( $this->processed );
 
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
