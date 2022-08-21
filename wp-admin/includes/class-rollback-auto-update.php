@@ -142,10 +142,10 @@ class WP_Rollback_Auto_Update {
 			return $errors;
 		}
 
+		$code = wp_remote_retrieve_response_code( $response );
 		$body = wp_remote_retrieve_body( $response );
-		error_log( 'alternate body: ' . var_export( $body, true ) );
 
-		if ( str_contains( $body, 'wp-die-message' ) ) {
+		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
 			$errors = new \WP_Error(
 				'new_version_error',
 				sprintf(
