@@ -135,7 +135,7 @@ class WP_Rollback_Auto_Update {
 				],
 				admin_url( 'plugins.php' )
 			),
-			[ 'timeout' => 10 ]
+			[ 'timeout' => 60 ]
 		);
 
 		if ( is_wp_error( $response ) ) {
