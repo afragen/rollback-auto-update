@@ -289,7 +289,7 @@ class WP_Rollback_Auto_Update {
 			'Rollback Auto-Update: %1$s in %2$s, error type %3$s',
 			$this->handler_args['handler_error'],
 			$this->handler_args['hook_extra']['plugin'],
-			empty( $e ) ? 'fatal' : $e['type']
+			empty( $e ) ? '?ParseError?' : $e['type']
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
