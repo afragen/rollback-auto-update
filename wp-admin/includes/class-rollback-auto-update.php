@@ -101,7 +101,7 @@ class WP_Rollback_Auto_Update {
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
-		$errors = $this->check_plugin_for_errors( $hook_extra['plugin'] );
+		$errors            = $this->check_plugin_for_errors( $hook_extra['plugin'] );
 		$this->processed[] = $hook_extra['plugin'];
 		error_log( $hook_extra['plugin'] . ' auto updated, $errors: ' . var_export( $errors, true ) );
 
