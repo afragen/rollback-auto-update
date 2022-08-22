@@ -203,7 +203,7 @@ class WP_Rollback_Auto_Update {
 		$this->cron_rollback();
 		$this->log_error_msg( $e );
 		$this->restart_updates();
-		$this->send_update_result_email();
+		// $this->send_update_result_email();
 	}
 
 	/**
@@ -308,6 +308,7 @@ class WP_Rollback_Auto_Update {
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
+		$this->send_update_result_email();
 	}
 
 	/**
