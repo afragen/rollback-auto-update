@@ -282,14 +282,14 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Outputs the handler error to the log file.
 	 *
-	 * @param array $e Error code.
+	 * @param array $e Last error.
 	 */
 	private function log_error_msg( $e ) {
 		$error_msg = sprintf(
-			'Rollback Auto-Update: %1$s in %2$s, error type %3$s',
+			'Rollback Auto-Update: %1$s in %2$s, error %3$s',
 			$this->handler_args['handler_error'],
 			$this->handler_args['hook_extra']['plugin'],
-			empty( $e ) ? '?ParseError?' : $e['type']
+			empty( $e ) ? '?ParseError?' : var_export( $e, true )
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
