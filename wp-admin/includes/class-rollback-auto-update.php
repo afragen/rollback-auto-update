@@ -41,11 +41,11 @@ class WP_Rollback_Auto_Update {
 	private $current;
 
 	/**
-	 * Stores plugin activation status.
+	 * Stores boolean for no error from check_plugin_for_errors().
 	 *
 	 * @var bool
 	 */
-	private $is_active = false;
+	private $no_error = false;
 
 	/**
 	 * Stores error codes.
@@ -85,7 +85,7 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
-		$this->current      = get_site_transient( 'update_plugins' );
+		$this->no_error     = false;
 		$this->handler_args = [
 			'handler_error' => '',
 			'result'        => $result,
@@ -101,7 +101,7 @@ class WP_Rollback_Auto_Update {
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
-		$errors            = $this->check_plugin_for_errors( $hook_extra['plugin'] );
+		$this->check_plugin_for_errors( $hook_extra['plugin'] );
 		$this->processed[] = $hook_extra['plugin'];
 		error_log( $hook_extra['plugin'] . ' auto updated, $errors: ' . var_export( $errors, true ) );
 
@@ -116,7 +116,9 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @param string $plugin The plugin to check.
 	 *
-	 * @return WP_Error|true A WP_Error object if an error occured, otherwise true.
+	 * @throws Exception If errors are present.
+	 *
+	 * @return void
 	 */
 	private function check_plugin_for_errors( $plugin ) {
 		global $wp_filesystem;
@@ -124,7 +126,7 @@ class WP_Rollback_Auto_Update {
 		if ( file_exists( ABSPATH . '.maintenance' ) ) {
 			$wp_filesystem->delete( ABSPATH . '.maintenance' );
 		}
-		$errors   = false;
+
 		$nonce    = wp_create_nonce( 'plugin-activation-error_' . $plugin );
 		$response = wp_remote_get(
 			add_query_arg(
@@ -140,16 +142,16 @@ class WP_Rollback_Auto_Update {
 
 		if ( is_wp_error( $response ) ) {
 			// If it isn't possible to run the check, assume an error.
-			error_log( $plugin . ' check_plugin_for_errors response: ' . var_export( $response, true ) );
 			throw new \Exception( $response->get_error_message() );
 		}
 
-		$code = wp_remote_retrieve_response_code( $response );
-		$body = wp_remote_retrieve_body( $response );
-		error_log( $plugin . ' check_plugin_for_errors code: ' . var_export( $code, true ) );
+		$code           = wp_remote_retrieve_response_code( $response );
+		$body           = wp_remote_retrieve_body( $response );
+		$this->no_error = 200 === $code;
 
+		error_log( 'check_for_plugin_errors code: ' . var_export( $code, true ) );
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
-			$errors = new \WP_Error(
+			$error = new \WP_Error(
 				'new_version_error',
 				sprintf(
 					/* translators: %s: The name of the plugin. */
@@ -157,10 +159,8 @@ class WP_Rollback_Auto_Update {
 					\get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin )['Name']
 				)
 			);
-			throw new \Exception( $errors->get_error_message() );
+			throw new \Exception( $error->get_error_message() );
 		}
-
-		return $errors;
 	}
 
 	/**
