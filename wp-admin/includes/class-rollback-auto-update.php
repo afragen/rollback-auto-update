@@ -244,7 +244,8 @@ class WP_Rollback_Auto_Update {
 		$delete_temp_backup = new \ReflectionMethod( $rollback_updater, 'delete_temp_backup' );
 		$delete_temp_backup->invoke( $rollback_updater );
 
-		$this->send_fatal_error_email();
+		error_log( $this->handler_args['hook_extra']['plugin'] . ' rolled back' );
+		// $this->send_fatal_error_email();
 	}
 
 	/**
