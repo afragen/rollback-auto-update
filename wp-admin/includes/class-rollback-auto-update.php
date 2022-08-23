@@ -180,7 +180,14 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
-		$this->handler();
+		error_log( 'error handler: ' . var_export( $this->handler_args['hook_extra']['plugin'], true ) );
+
+		$e                = error_get_last();
+		$non_fatal_errors = ( ! empty( $e ) && $this->error_types !== $e['type'] );
+		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->no_error;
+		$skip             = $skip ? $skip : $non_fatal_errors;
+
+		$this->handler( $skip );
 	}
 
 	/**
@@ -188,25 +195,25 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		$this->handler();
+		error_log( 'exception handler: ' . var_export( $this->handler_args['hook_extra']['plugin'], true ) );
+		$this->handler( false );
 	}
 
 	/**
 	 * Handles errors by running Rollback.
+	 *
+	 * @param bool If false, assume fatal and process, default false.
 	 */
-	private function handler() {
-		// Exit for non-fatal errors.
-		$e = error_get_last();
-		if ( ! empty( $e ) && $this->error_types !== $e['type'] ) {
-			error_log( $this->handler_args['hook_extra']['plugin'] . ' ' . var_export( $e, true ) );
+	private function handler( $skip = false ) {
+		if ( $skip ) {
+			error_log( 'exit handler skip: ' . var_export( $skip, true ) );
 			return;
 		}
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-		$this->log_error_msg( $e );
+		$this->log_error_msg( error_get_last() );
 		$this->restart_updates();
-		// $this->send_update_result_email();
 	}
 
 	/**
