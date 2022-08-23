@@ -97,13 +97,15 @@ class WP_Rollback_Auto_Update {
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
 
+		error_log( $hook_extra['plugin'] . ' processing...' );
+		$this->processed[] = $hook_extra['plugin'];
+
 		// This needed for inactive plugins that fatal.
 		// Working parts of plugin_sandbox_scrape().
 		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
 		include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 
 		$this->check_plugin_for_errors( $hook_extra['plugin'] );
-		$this->processed[] = $hook_extra['plugin'];
 		error_log( $hook_extra['plugin'] . ' auto updated, $errors: ' . var_export( $errors, true ) );
 
 		return $result;
