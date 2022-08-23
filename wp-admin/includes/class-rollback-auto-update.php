@@ -38,7 +38,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @var \stdClass
 	 */
-	private $current;
+	private static $current;
 
 	/**
 	 * Stores boolean for no error from check_plugin_for_errors().
@@ -86,6 +86,7 @@ class WP_Rollback_Auto_Update {
 		}
 
 		$this->no_error     = false;
+		static::$current    = get_site_transient( 'update_plugins' );
 		$this->handler_args = [
 			'handler_error' => '',
 			'result'        => $result,
@@ -324,8 +325,8 @@ class WP_Rollback_Auto_Update {
 		 */
 		$plugins = get_plugins();
 
-		foreach ( $this->current->response as $k => $update ) {
-			$item = $this->current->response[ $k ];
+		foreach ( static::$current->response as $k => $update ) {
+			$item = static::$current->response[ $k ];
 			$name = $plugins[ $update->plugin ]['Name'];
 
 			/*
@@ -333,12 +334,12 @@ class WP_Rollback_Auto_Update {
 			 * at this stage of an auto-update when not implementing this
 			 * feature directly in Core.
 			 */
-			$current_version = $this->current->checked[ $update->plugin ];
+			$current_version = static::$current->checked[ $update->plugin ];
 
 			/*
 			 * The `current_version` property does not exist yet. Add it.
 			 *
-			 * `$this->current->response[ $k ]` is an instance of `stdClass`,
+			 * `static::$current->response[ $k ]` is an instance of `stdClass`,
 			 * so this should not fall victim to PHP 8.2's deprecation of
 			 * dynamic properties.
 			 */
@@ -349,7 +350,9 @@ class WP_Rollback_Auto_Update {
 				'item' => $item,
 			];
 
-			if ( in_array( $update->plugin, $this->processed, true ) ) {
+			$success = array_diff( $this->processed, $this->fatals );
+
+			if ( in_array( $update->plugin, $success, true ) ) {
 				$successful['plugin'][] = $plugin_result;
 				continue;
 			}
