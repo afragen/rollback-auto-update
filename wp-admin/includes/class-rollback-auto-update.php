@@ -182,13 +182,7 @@ class WP_Rollback_Auto_Update {
 		$this->handler_args['handler_error'] = 'Error Caught';
 		// error_log( 'error handler: ' . var_export( $this->handler_args['hook_extra']['plugin'], true ) );
 
-		// Skip (exit handler() early) for non-fatal errors or non-errors.
-		$e                = error_get_last();
-		$non_fatal_errors = ( ! empty( $e ) && $this->error_types !== $e['type'] );
-		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->no_error;
-		$skip             = $skip ? $skip : $non_fatal_errors;
-
-		$this->handler( $skip );
+		$this->handler( $this->non_fatal_errors() );
 	}
 
 	/**
@@ -215,6 +209,20 @@ class WP_Rollback_Auto_Update {
 		$this->cron_rollback();
 		$this->log_error_msg( error_get_last() );
 		$this->restart_updates();
+	}
+
+	/**
+	 * Skip (exit handler() early) for non-fatal errors or non-errors.
+	 *
+	 * @return bool
+	 */
+	private function non_fatal_errors() {
+		$e                = error_get_last();
+		$non_fatal_errors = ( ! empty( $e ) && $this->error_types !== $e['type'] );
+		$skip             = is_plugin_active( $this->handler_args['hook_extra']['plugin'] ) || $this->no_error;
+		$skip             = $skip ? $skip : $non_fatal_errors;
+
+		return $skip;
 	}
 
 	/**
