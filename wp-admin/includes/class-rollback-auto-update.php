@@ -105,6 +105,7 @@ class WP_Rollback_Auto_Update {
 			include WP_PLUGIN_DIR . '/' . $hook_extra['plugin'];
 		}
 
+		// Needs to run for both active and inactive plugins. Don't ask why, just except it.
 		$this->check_plugin_for_errors( $hook_extra['plugin'] );
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
