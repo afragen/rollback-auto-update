@@ -1,10 +1,12 @@
 [unreleased]
 
-#### 0.7.0 / 2022-08-07
+#### 0.8.0 / 2022-08-24
 * large refactor into smaller chunks
-* load in `__construct()`
-* update error email message
+* load in static hook
 * don't check our own plugin, cause it will always have a PHP fatal for redeclaring the class
+* refactor for restarting plugin update process after a fatal
+* add function for sending successful update email
+* refactor for inclusion into core
 
 #### 0.6.0 / 2022-08-05
 * update documentation
