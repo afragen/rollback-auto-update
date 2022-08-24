@@ -119,7 +119,7 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @param string $plugin The plugin to check.
 	 *
-	 * @throws Exception If errors are present.
+	 * @throws \Exception If errors are present.
 	 *
 	 * @return void
 	 */
@@ -197,7 +197,7 @@ class WP_Rollback_Auto_Update {
 	/**
 	 * Handles errors by running Rollback.
 	 *
-	 * @param bool If false, assume fatal and process, default false.
+	 * @param bool $skip If false, assume fatal and process, default false.
 	 */
 	private function handler( $skip = false ) {
 		if ( $skip ) {
