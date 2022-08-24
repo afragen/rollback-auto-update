@@ -370,21 +370,21 @@ class WP_Rollback_Auto_Update {
 			return [];
 		}
 
-		// error_log( 'fatals ' . var_export( array_unique( $this->fatals ), true ) );
 		// Get array of plugins set for auto-updating.
 		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
 		$current_plugins = array_keys( static::$current->response );
 
 		// Get all auto-updating plugins that have updates available.
 		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
-		// error_log( 'current auto updates: ' . var_export( $current_auto_updates, true ) );
 
 		// Get array of non-fatal auto-updates remaining.
 		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
-		// error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
 
 		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
 
+		// error_log( 'fatals ' . var_export( array_unique( $this->fatals ), true ) );
+		// error_log( 'current auto updates: ' . var_export( $current_auto_updates, true ) );
+		// error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
 		// error_log( 'processed ' . var_export( $this->processed, true ) );
 		return $remaining_auto_updates;
 	}
