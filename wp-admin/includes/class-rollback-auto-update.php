@@ -152,7 +152,7 @@ class WP_Rollback_Auto_Update {
 		$body           = wp_remote_retrieve_body( $response );
 		$this->no_error = 200 === $code;
 
-		error_log( 'check_for_plugin_errors code: ' . var_export( $code, true ) );
+		// error_log( 'check_for_plugin_errors code: ' . var_export( $code, true ) );
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
 			$error = new \WP_Error(
 				'new_version_error',
