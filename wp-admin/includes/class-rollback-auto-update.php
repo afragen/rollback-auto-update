@@ -308,6 +308,7 @@ class WP_Rollback_Auto_Update {
 	 * Sends an email noting successful and failed updates.
 	 */
 	private function send_update_result_email() {
+		add_filter( 'auto_plugin_theme_update_email', [ $this, 'props' ], 10, 4 );
 		$successful = [];
 		$failed     = [];
 
@@ -358,6 +359,37 @@ class WP_Rollback_Auto_Update {
 		$send_plugin_theme_email = new \ReflectionMethod( $automatic_upgrader, 'send_plugin_theme_email' );
 		$send_plugin_theme_email->setAccessible( true );
 		$send_plugin_theme_email->invoke( $automatic_upgrader, 'mixed', $successful, $failed );
+	}
+
+	/**
+	 * Credit where credit is due.
+	 *
+	 * @param array  $email {
+	 *     Array of email arguments that will be passed to wp_mail().
+	 *
+	 *     @type string $to      The email recipient. An array of emails
+	 *                           can be returned, as handled by wp_mail().
+	 *     @type string $subject The email's subject.
+	 *     @type string $body    The email message body.
+	 *     @type string $headers Any email headers, defaults to no headers.
+	 * }
+	 * @param string $type               The type of email being sent. Can be one of 'success', 'fail', 'mixed'.
+	 * @param array  $successful_updates A list of updates that succeeded.
+	 * @param array  $failed_updates     A list of updates that failed.
+	 *
+	 * @return void
+	 */
+	public function props( $email, $type, $successful_updates, $failed_updates ) {
+		if ( empty( $failed_updates ) ) {
+			return $email;
+		}
+		$body = explode( "\n", $email['body'] );
+		array_pop( $body );
+		$body[]        = "\n" . __( 'The WordPress Rollbackenberg Team' );
+		$body          = implode( "\n", $body );
+		$email['body'] = $body;
+
+		return $email;
 	}
 
 	/**
