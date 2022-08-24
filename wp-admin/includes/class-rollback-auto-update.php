@@ -85,6 +85,7 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
+		error_log( $hook_extra['plugin'] . ' processing...' );
 		$this->no_error     = false;
 		static::$current    = get_site_transient( 'update_plugins' );
 		$this->handler_args = [
@@ -96,7 +97,6 @@ class WP_Rollback_Auto_Update {
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
 
-		error_log( $hook_extra['plugin'] . ' processing...' );
 		$this->processed[] = $hook_extra['plugin'];
 
 		if ( is_plugin_inactive( $hook_extra['plugin'] ) ) {
@@ -106,7 +106,6 @@ class WP_Rollback_Auto_Update {
 		} else {
 			$this->check_plugin_for_errors( $hook_extra['plugin'] );
 		}
-
 		error_log( $hook_extra['plugin'] . ' auto updated.' );
 
 		return $result;
