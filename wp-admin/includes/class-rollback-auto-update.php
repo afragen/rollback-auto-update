@@ -377,7 +377,7 @@ class WP_Rollback_Auto_Update {
 	 * @param array  $successful_updates A list of updates that succeeded.
 	 * @param array  $failed_updates     A list of updates that failed.
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function props( $email, $type, $successful_updates, $failed_updates ) {
 		if ( empty( $failed_updates ) ) {
