@@ -92,7 +92,6 @@ class WP_Rollback_Auto_Update {
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
 		];
-		$this->is_active    = is_plugin_active( $hook_extra['plugin'] );
 
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
