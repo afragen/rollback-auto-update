@@ -85,6 +85,11 @@ class WP_Rollback_Auto_Update {
 			return $result;
 		}
 
+		// Checking our own plugin will cause a PHP Fatal redeclaration error.
+		if ( 'rollback-auto-update/plugin.php' === $hook_extra['plugin'] ) {
+			return $result;
+		}
+
 		error_log( $hook_extra['plugin'] . ' processing...' );
 		$this->no_error     = false;
 		static::$current    = get_site_transient( 'update_plugins' );
@@ -98,11 +103,6 @@ class WP_Rollback_Auto_Update {
 		$this->initialize_handlers();
 
 		$this->processed[] = $hook_extra['plugin'];
-
-		// Checking our own plugin will cause a PHP Fatal redeclaration error.
-		if ( 'rollback-auto-update/plugin.php' === $hook_extra['plugin'] ) {
-			return $result;
-		}
 
 		if ( is_plugin_inactive( $hook_extra['plugin'] ) ) {
 			// Working parts of plugin_sandbox_scrape().
