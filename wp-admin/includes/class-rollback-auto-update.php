@@ -99,6 +99,11 @@ class WP_Rollback_Auto_Update {
 
 		$this->processed[] = $hook_extra['plugin'];
 
+		// Checking our own plugin will cause a PHP Fatal redeclaration error.
+		if ( 'rollback-auto-update/plugin.php' === $hook_extra['plugin'] ) {
+			return $result;
+		}
+
 		if ( is_plugin_inactive( $hook_extra['plugin'] ) ) {
 			// Working parts of plugin_sandbox_scrape().
 			wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $hook_extra['plugin'] );
