@@ -297,7 +297,7 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 
-		error_log( 'restart Plugin_Upgrader::bulk_upgrade ' . var_export( $remaining_auto_updates, true ) );
+		// error_log( 'restart Plugin_Upgrader::bulk_upgrade ' . var_export( $remaining_auto_updates, true ) );
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
