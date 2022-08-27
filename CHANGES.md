@@ -1,4 +1,5 @@
 [unreleased]
+* add `sleep(2)` to possibly prevent a race condition
 
 #### 0.8.0 / 2022-08-24
 * large refactor into smaller chunks
