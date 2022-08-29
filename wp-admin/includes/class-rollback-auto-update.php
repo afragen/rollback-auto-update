@@ -290,6 +290,10 @@ class WP_Rollback_Auto_Update {
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
+
+		// Let's sleep for a couple of seconds here.
+		// After the error handler and before restarting updates.
+		sleep( 2 );
 	}
 
 	/**
