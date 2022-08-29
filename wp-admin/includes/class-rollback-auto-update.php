@@ -94,7 +94,7 @@ class WP_Rollback_Auto_Update {
 		// I believe this helps to avoid a potential race condition on servers that may start to
 		// process the next plugin for auto-updating before the handler can pick up an error from
 		// the previously processed plugin.
-		sleep( 3 );
+		sleep( 2 );
 
 		$this->no_error     = false;
 		static::$current    = get_site_transient( 'update_plugins' );
