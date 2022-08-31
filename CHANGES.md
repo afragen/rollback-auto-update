@@ -1,5 +1,6 @@
 [unreleased]
 * add `sleep(2)` to possibly prevent a race condition before each plugin and before restarts
+* check for `core_updater.lock` and exit if running a core update
 
 #### 0.8.0 / 2022-08-24
 * large refactor into smaller chunks
