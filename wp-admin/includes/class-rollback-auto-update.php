@@ -69,12 +69,6 @@ class WP_Rollback_Auto_Update {
 	 * @return void
 	 */
 	public function load_hooks() {
-		$lock_result = get_option( 'core_updater.lock' );
-		// Check to see if the lock is still valid. If it is, bail.
-		if ( $lock_result > ( time() - ( 15 * MINUTE_IN_SECONDS ) ) ) {
-			return false;
-		}
-
 		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
 	}
 
