@@ -81,11 +81,6 @@ class WP_Rollback_Auto_Update {
 	 * @return array|WP_Error
 	 */
 	public function auto_update_check( $result, $hook_extra ) {
-		// Don't run during core update.
-		if ( false === get_option( 'core_updater.lock' ) ) {
-			return false;
-		}
-
 		if ( is_wp_error( $result ) || ! wp_doing_cron() || ! isset( $hook_extra['plugin'] ) ) {
 			return $result;
 		}
