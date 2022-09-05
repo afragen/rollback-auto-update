@@ -91,7 +91,7 @@ class WP_Rollback_Auto_Update {
 		}
 		error_log( $hook_extra['plugin'] . ' processing...' );
 
-		// I believe this helps to avoid a potential race condition on servers that may start to
+		// This possibly helps to avoid a potential race condition on servers that may start to
 		// process the next plugin for auto-updating before the handler can pick up an error from
 		// the previously processed plugin.
 		sleep( 2 );
@@ -423,8 +423,8 @@ class WP_Rollback_Auto_Update {
 			return $email;
 		}
 		$body   = explode( "\n", $email['body'] );
-		$failed = __( 'Some failed updates may have been rolled back due to detection of a fatal error.' );
-		array_splice( $body, 6, 0, $failed );
+		$failed = __( 'These plugins failed to update or may have been rolled back due to detection of a fatal error:' );
+		array_splice( $body, 6, 1, $failed );
 		$props = __( 'The WordPress Rollbackenberg Team' );
 		array_splice( $body, -1, 1, $props );
 		$body          = implode( "\n", $body );
