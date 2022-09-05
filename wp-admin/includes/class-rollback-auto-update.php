@@ -422,12 +422,11 @@ class WP_Rollback_Auto_Update {
 		if ( empty( $failed_updates ) ) {
 			return $email;
 		}
-		$body       = explode( "\n", $email['body'] );
-		$greeting[] = array_shift( $body );
-		$greeting[] = "\n" . __( 'Some failed updates may have been rolled back due to detection of a fatal error.' ) . "\n";
-		array_pop( $body );
-		$body[]        = "\n" . __( 'The WordPress Rollbackenberg Team' );
-		$body          = array_merge( $greeting, $body );
+		$body   = explode( "\n", $email['body'] );
+		$failed = __( 'Some failed updates may have been rolled back due to detection of a fatal error.' );
+		array_splice( $body, 6, 0, $failed );
+		$props = __( 'The WordPress Rollbackenberg Team' );
+		array_splice( $body, -1, 1, $props );
 		$body          = implode( "\n", $body );
 		$email['body'] = $body;
 
