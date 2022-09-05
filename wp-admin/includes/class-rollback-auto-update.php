@@ -91,7 +91,7 @@ class WP_Rollback_Auto_Update {
 		}
 		error_log( $hook_extra['plugin'] . ' processing...' );
 
-		// I believe this helps to avoid a potential race condition on servers that may start to
+		// This possibly helps to avoid a potential race condition on servers that may start to
 		// process the next plugin for auto-updating before the handler can pick up an error from
 		// the previously processed plugin.
 		sleep( 2 );

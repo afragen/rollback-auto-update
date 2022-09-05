@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 0.9.1 / 2022-09-05
+* more updates to email text
+
 #### 0.9.0 / 2022-09-04
 * add `sleep(2)` to possibly prevent a race condition before each plugin and before restarts
 * update email text
