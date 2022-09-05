@@ -1,5 +1,6 @@
 [unreleased]
 * add `sleep(2)` to possibly prevent a race condition before each plugin and before restarts
+* update email text
 
 #### 0.8.0 / 2022-08-24
 * large refactor into smaller chunks

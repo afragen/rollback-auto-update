@@ -219,6 +219,11 @@ class WP_Rollback_Auto_Update {
 
 		$this->cron_rollback();
 		$this->log_error_msg( error_get_last() );
+
+		// Let's sleep for a couple of seconds here.
+		// After the error handler and before restarting updates.
+		sleep( 2 );
+
 		$this->restart_updates();
 	}
 
@@ -290,10 +295,6 @@ class WP_Rollback_Auto_Update {
 		);
 		//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		error_log( $error_msg );
-
-		// Let's sleep for a couple of seconds here.
-		// After the error handler and before restarting updates.
-		sleep( 2 );
 	}
 
 	/**
@@ -311,6 +312,35 @@ class WP_Rollback_Auto_Update {
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
 		$this->send_update_result_email();
+	}
+
+	/**
+	 * Get array of non-fataling auto-updates remaining.
+	 *
+	 * @return array
+	 */
+	private function get_remaining_auto_updates() {
+		if ( empty( $this->handler_args ) ) {
+			return [];
+		}
+
+		// Get array of plugins set for auto-updating.
+		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
+		$current_plugins = array_keys( static::$current->response );
+
+		// Get all auto-updating plugins that have updates available.
+		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
+
+		// Get array of non-fatal auto-updates remaining.
+		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
+
+		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
+
+		// error_log( 'fatals ' . var_export( array_unique( $this->fatals ), true ) );
+		// error_log( 'current auto updates: ' . var_export( $current_auto_updates, true ) );
+		// error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
+		// error_log( 'processed ' . var_export( $this->processed, true ) );
+		return $remaining_auto_updates;
 	}
 
 	/**
@@ -392,41 +422,15 @@ class WP_Rollback_Auto_Update {
 		if ( empty( $failed_updates ) ) {
 			return $email;
 		}
-		$body = explode( "\n", $email['body'] );
+		$body       = explode( "\n", $email['body'] );
+		$greeting[] = array_shift( $body );
+		$greeting[] = "\n" . __( 'Some failed updates may have been rolled back due to detection of a fatal error.' ) . "\n";
 		array_pop( $body );
 		$body[]        = "\n" . __( 'The WordPress Rollbackenberg Team' );
+		$body          = array_merge( $greeting, $body );
 		$body          = implode( "\n", $body );
 		$email['body'] = $body;
 
 		return $email;
-	}
-
-	/**
-	 * Get array of non-fataling auto-updates remaining.
-	 *
-	 * @return array
-	 */
-	private function get_remaining_auto_updates() {
-		if ( empty( $this->handler_args ) ) {
-			return [];
-		}
-
-		// Get array of plugins set for auto-updating.
-		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
-		$current_plugins = array_keys( static::$current->response );
-
-		// Get all auto-updating plugins that have updates available.
-		$current_auto_updates = array_intersect( $auto_updates, $current_plugins );
-
-		// Get array of non-fatal auto-updates remaining.
-		$remaining_auto_updates = array_diff( $current_auto_updates, $this->processed, $this->fatals );
-
-		$this->processed = array_unique( array_merge( $this->processed, $remaining_auto_updates ) );
-
-		// error_log( 'fatals ' . var_export( array_unique( $this->fatals ), true ) );
-		// error_log( 'current auto updates: ' . var_export( $current_auto_updates, true ) );
-		// error_log( 'remaining auto updates ' . var_export( $remaining_auto_updates, true ) );
-		// error_log( 'processed ' . var_export( $this->processed, true ) );
-		return $remaining_auto_updates;
 	}
 }
