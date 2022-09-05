@@ -16,10 +16,10 @@
  * Plugin Name:       Rollback Auto-Update
  * Plugin URI:        https://github.com/afragen/rollback-auto-update
  * Description:       Rollback an auto-update containing an activation error.
- * Version:           0.8.0
+ * Version:           0.9.0
  * Author:            WP Core Contributors
  * License:           MIT
- * Requires at least: 5.9
+ * Requires at least: 6.0
  * Requires PHP:      5.6
  * GitHub Plugin URI: https://github.com/afragen/rollback-auto-update
  * Primary Branch:    main
