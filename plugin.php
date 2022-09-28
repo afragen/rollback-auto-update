@@ -48,7 +48,7 @@ class Init {
 		require_once __DIR__ . '/wp-admin/includes/class-rollback-auto-update.php';
 
 		// Add to wp-admin/includes/admin-filters.php.
-		add_action( 'init', [ 'WP_Rollback_Auto_Update', 'init' ] );
+		add_action( 'init', array( 'WP_Rollback_Auto_Update', 'init' ) );
 	}
 }
 
