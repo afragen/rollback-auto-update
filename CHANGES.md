@@ -1,5 +1,8 @@
 [unreleased]
 
+#### 0.9.2 / 2022-10-09
+* move `send_update_result_email` so fires after `restart_updates`
+
 #### 0.9.1 / 2022-09-05
 * more updates to email text
 

@@ -17,21 +17,21 @@ class WP_Rollback_Auto_Update {
 	 *
 	 * @var array
 	 */
-	private $handler_args = [];
+	private $handler_args = array();
 
 	/**
 	 * Stores successfully updated plugins.
 	 *
 	 * @var array
 	 */
-	private $processed = [];
+	private $processed = array();
 
 	/**
 	 * Stores fataling plugins.
 	 *
 	 * @var array
 	 */
-	private $fatals = [];
+	private $fatals = array();
 
 	/**
 	 * Stores `update_plugins` transient.
@@ -69,7 +69,7 @@ class WP_Rollback_Auto_Update {
 	 * @return void
 	 */
 	public function load_hooks() {
-		add_filter( 'upgrader_install_package_result', [ $this, 'auto_update_check' ], 15, 2 );
+		add_filter( 'upgrader_install_package_result', array( $this, 'auto_update_check' ), 15, 2 );
 	}
 
 	/**
@@ -98,11 +98,11 @@ class WP_Rollback_Auto_Update {
 
 		$this->no_error     = false;
 		static::$current    = get_site_transient( 'update_plugins' );
-		$this->handler_args = [
+		$this->handler_args = array(
 			'handler_error' => '',
 			'result'        => $result,
 			'hook_extra'    => $hook_extra,
-		];
+		);
 
 		// Register exception and shutdown handlers.
 		$this->initialize_handlers();
@@ -144,14 +144,14 @@ class WP_Rollback_Auto_Update {
 		$nonce    = wp_create_nonce( 'plugin-activation-error_' . $plugin );
 		$response = wp_remote_get(
 			add_query_arg(
-				[
+				array(
 					'action'   => 'error_scrape',
 					'plugin'   => $plugin,
 					'_wpnonce' => $nonce,
-				],
+				),
 				admin_url( 'plugins.php' )
 			),
-			[ 'timeout' => 60 ]
+			array( 'timeout' => 60 )
 		);
 
 		if ( is_wp_error( $response ) ) {
@@ -182,8 +182,8 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function initialize_handlers() {
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
-		set_error_handler( [ $this, 'error_handler' ], ( E_ALL ^ $this->error_types ) );
-		set_exception_handler( [ $this, 'exception_handler' ] );
+		set_error_handler( array( $this, 'error_handler' ), ( E_ALL ^ $this->error_types ) );
+		set_exception_handler( array( $this, 'exception_handler' ) );
 	}
 
 	/**
@@ -225,6 +225,7 @@ class WP_Rollback_Auto_Update {
 		sleep( 2 );
 
 		$this->restart_updates();
+		$this->send_update_result_email();
 	}
 
 	/**
@@ -249,13 +250,13 @@ class WP_Rollback_Auto_Update {
 	private function cron_rollback() {
 		global $wp_filesystem;
 
-		$temp_backup = [
-			'temp_backup' => [
+		$temp_backup = array(
+			'temp_backup' => array(
 				'dir'  => 'plugins',
 				'slug' => dirname( $this->handler_args['hook_extra']['plugin'] ),
 				'src'  => $wp_filesystem->wp_plugins_dir(),
-			],
-		];
+			),
+		);
 
 		include_once $wp_filesystem->wp_plugins_dir() . 'rollback-update-failure/wp-admin/includes/class-wp-upgrader.php';
 		$rollback_updater = new \Rollback_Update_Failure\WP_Upgrader();
@@ -311,7 +312,6 @@ class WP_Rollback_Auto_Update {
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
-		$this->send_update_result_email();
 	}
 
 	/**
@@ -321,11 +321,11 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function get_remaining_auto_updates() {
 		if ( empty( $this->handler_args ) ) {
-			return [];
+			return array();
 		}
 
 		// Get array of plugins set for auto-updating.
-		$auto_updates    = (array) get_site_option( 'auto_update_plugins', [] );
+		$auto_updates    = (array) get_site_option( 'auto_update_plugins', array() );
 		$current_plugins = array_keys( static::$current->response );
 
 		// Get all auto-updating plugins that have updates available.
@@ -347,9 +347,9 @@ class WP_Rollback_Auto_Update {
 	 * Sends an email noting successful and failed updates.
 	 */
 	private function send_update_result_email() {
-		add_filter( 'auto_plugin_theme_update_email', [ $this, 'props' ], 10, 4 );
-		$successful = [];
-		$failed     = [];
+		add_filter( 'auto_plugin_theme_update_email', array( $this, 'props' ), 10, 4 );
+		$successful = array();
+		$failed     = array();
 
 		/*
 		 * Using `get_plugin_data()` instead has produced warnings/errors
@@ -377,10 +377,10 @@ class WP_Rollback_Auto_Update {
 			 */
 			$item->current_version = $current_version;
 
-			$plugin_result = (object) [
+			$plugin_result = (object) array(
 				'name' => $name,
 				'item' => $item,
-			];
+			);
 
 			$success = array_diff( $this->processed, $this->fatals );
 
