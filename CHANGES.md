@@ -1,4 +1,5 @@
 [unreleased]
+* remove some error logging
 
 #### 0.9.2 / 2022-10-09
 * move `send_update_result_email` so fires after `restart_updates`

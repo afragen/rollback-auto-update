@@ -163,7 +163,6 @@ class WP_Rollback_Auto_Update {
 		$body           = wp_remote_retrieve_body( $response );
 		$this->no_error = 200 === $code;
 
-		// error_log( 'check_for_plugin_errors code: ' . var_export( $code, true ) );
 		if ( str_contains( $body, 'wp-die-message' ) || 200 !== $code ) {
 			$error = new \WP_Error(
 				'new_version_error',
@@ -191,8 +190,6 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function error_handler() {
 		$this->handler_args['handler_error'] = 'Error Caught';
-		// error_log( 'error handler: ' . var_export( $this->handler_args['hook_extra']['plugin'], true ) );
-
 		$this->handler( $this->non_fatal_errors() );
 	}
 
@@ -201,7 +198,6 @@ class WP_Rollback_Auto_Update {
 	 */
 	public function exception_handler() {
 		$this->handler_args['handler_error'] = 'Exception Caught';
-		// error_log( 'exception handler: ' . var_export( $this->handler_args['hook_extra']['plugin'], true ) );
 		$this->handler( false );
 	}
 
@@ -212,13 +208,12 @@ class WP_Rollback_Auto_Update {
 	 */
 	private function handler( $skip = false ) {
 		if ( $skip ) {
-			// error_log( 'exit handler skip: ' . var_export( $skip, true ) );
 			return;
 		}
 		$this->fatals[] = $this->handler_args['hook_extra']['plugin'];
 
 		$this->cron_rollback();
-		$this->log_error_msg( error_get_last() );
+		// $this->log_error_msg( error_get_last() );
 
 		// Let's sleep for a couple of seconds here.
 		// After the error handler and before restarting updates.
@@ -308,7 +303,6 @@ class WP_Rollback_Auto_Update {
 			return;
 		}
 
-		// error_log( 'restart Plugin_Upgrader::bulk_upgrade ' . var_export( $remaining_auto_updates, true ) );
 		$skin     = new \Automatic_Upgrader_Skin();
 		$upgrader = new \Plugin_Upgrader( $skin );
 		$upgrader->bulk_upgrade( $remaining_auto_updates );
